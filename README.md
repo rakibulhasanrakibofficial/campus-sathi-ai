@@ -1,86 +1,245 @@
 # ✳ CampusSathi AI
+
 ### Campus problems. Clear next steps.
 
-CampusSathi AI is a bilingual, voice-enabled campus companion that helps university students turn everyday campus issues into a practical, prioritized action plan. It is designed around real student-life topics: transport, classes, facilities, notices, clubs, accessibility, careers and wellbeing.
+**CampusSathi AI** is a bilingual, voice-enabled campus companion that helps university students turn everyday campus concerns into a clear, prioritized action plan. Students can describe an issue, choose a campus category, get suggestions powered by **Gemma through Ollama**, listen to the answer, copy it, or print/save it as a PDF.
 
-> **Important:** CampusSathi gives AI-generated suggestions. It does not file official university complaints, verify campus rules, or replace official university services or emergency support.
+<p align="center">
+  <strong>বাংলা • English • Voice Input • AI Action Plans • PDF Export</strong>
+</p>
 
-## ✨ What it does
+> **Important:** CampusSathi provides AI-generated guidance. It does not submit an official university complaint, contact campus staff, verify university policies, or replace official university services or emergency support.
 
-- **Campus action plans:** describe a problem and get a structured assessment, prioritized next steps, what to avoid, and when to contact an appropriate campus or local service.
-- **Bengali and English:** choose Bengali, English, or let the app infer the response language. Banglish input may be recognized as Bengali based on common words.
-- **Voice-to-text:** speak a campus issue into the text box using browser speech-recognition support.
-- **Text-to-voice:** listen to the AI response using browser/device speech synthesis. No ElevenLabs key is needed.
-- **Campus categories:** transport, academics, facilities, notices/admin, clubs/events, wellbeing, careers, safety/accessibility and general issues.
-- **Responsive design:** custom dark-violet interface with cyan, mint and pink accents for desktop and mobile.
-- **Privacy-aware by default:** this server does not store reports in a database. Avoid entering passwords, student identifiers or sensitive personal information.
+---
 
-## 🧱 Technology
+## 📚 Table of contents
+
+- [Why CampusSathi?](#-why-campussathi)
+- [Features](#-features)
+- [How it works](#-how-it-works)
+- [Technology stack](#-technology-stack)
+- [Project structure](#-project-structure)
+- [Run locally](#-run-locally)
+- [Environment variables](#-environment-variables)
+- [API reference](#-api-reference)
+- [Voice and browser support](#-voice-and-browser-support)
+- [Privacy, safety, and limitations](#-privacy-safety-and-limitations)
+- [AI and model disclosure](#-ai-and-model-disclosure)
+- [Testing checklist](#-testing-checklist)
+- [Deployment](#-deployment)
+- [License](#-license)
+
+---
+
+## 🎯 Why CampusSathi?
+
+University students face small but recurring problems—late buses, unclear notices, broken classroom equipment, accessibility concerns, and difficulty finding student opportunities. Knowing the next practical step is not always obvious.
+
+CampusSathi gives students a simple place to describe a concern and receive structured suggestions in Bengali or English. The goal is to make the next step easier to understand, not to replace university staff or official reporting channels.
+
+## ✨ Features
+
+### 🧠 AI-powered campus action plans
+
+- Describe a campus problem in your own words.
+- Select a relevant problem category and optionally add a campus location.
+- Receive an answer powered by a Gemma model through Ollama.
+- The model is instructed to organize the response into a problem category, short assessment, prioritized actions, things to avoid, and guidance on when to contact the university or an appropriate local service.
+- The prompt asks for **three prioritized actions** and a concise answer.
+- The answer reminds users to verify important information with official sources.
+
+### 🌐 Bengali and English
+
+- **Interface language:** switch between Bengali and English for the app's interface.
+- **Answer language:** choose Bengali, English, or match the language inferred from the issue.
+- **Automatic language detection:** Bengali script and common Banglish terms are used as signals when the answer language is set to automatic.
+- **Bengali-first guidance:** when Bengali is selected or detected, the model is instructed to return its headings and guidance in Bengali script.
+
+### 🎙 Voice input
+
+- Use **Speak instead** to dictate a campus issue instead of typing.
+- Choose a microphone language: **বাংলা (বাংলাদেশ), English (US), or English (UK)**.
+- Review and edit the recognized text before submitting it to the AI.
+- Browser speech recognition is optional; typing always remains available.
+
+### 🔊 Listen to the answer
+
+- Play the generated answer using the browser/device text-to-speech engine.
+- Stop playback whenever needed, then listen again.
+- The playback code separates Bengali-script and English chunks to request a suitable language voice for each part.
+- Speech is played at a slightly slower rate to make the answer easier to follow.
+- Voice quality depends on the browser, operating system, and installed voices—especially for Bengali.
+
+### 📄 Copy, print, and PDF
+
+- **Copy** the generated answer to the clipboard.
+- **Print / PDF** opens the browser's print dialog.
+- To create a PDF, choose **Save as PDF** in the print dialog.
+- The print layout hides the form and action buttons so the output focuses on the answer.
+
+### 🧭 Campus issue categories
+
+The form supports these categories:
+
+- General campus issue
+- Transport and buses
+- Classes and academics
+- Facilities and maintenance
+- Notices and administration
+- Clubs and campus events
+- Student wellbeing
+- Careers and opportunities
+- Safety and accessibility
+
+The sidebar also has clickable quick-category cards. Example prompts can fill the form and select a matching category, helping new users get started quickly.
+
+### 🧩 Helpful interface details
+
+- A responsive, custom dark interface with bright cyan, mint, violet, and pink accents.
+- Mobile-friendly answer controls with clearly distinguished Listen, Stop, Copy, and Print actions.
+- Character counter and a 2,500-character limit for the problem description.
+- Optional campus-location field (up to 120 characters on the server).
+- New Report control to clear the current draft and start another issue.
+- Loading, validation, provider-error, microphone-status, and speech-playback messages.
+- A privacy reminder and safety note in the interface.
+
+---
+
+## 🔄 How it works
+
+1. **Describe a problem** by typing or using supported browser speech recognition.
+2. **Choose a category** and optionally provide a location.
+3. **Select an answer language** or leave it on automatic detection.
+4. **Build an action plan.** The backend validates the input and sends it to the configured Gemma model through Ollama.
+5. **Use the answer**—read it, listen, copy it, or print/save it as a PDF.
+
+CampusSathi provides guidance only. It does not create a ticket, send a complaint to the university, or contact anyone on the student's behalf.
+
+---
+
+## 🧰 Technology stack
 
 | Area | Technology |
-|---|---|
-| Frontend | HTML, CSS and browser JavaScript |
-| Backend | Node.js 20+, Express |
-| AI model | Gemma via Ollama (open-weight model family) |
-| Local inference | Ollama at http://127.0.0.1:11434/api/chat |
-| Hosted inference | Ollama Cloud chat API |
-| Voice input | Browser Web Speech API (SpeechRecognition where supported) |
-| Voice output | Browser Web Speech API (speechSynthesis) |
-| Deployment | Node.js host with environment variables and outbound HTTPS |
+| --- | --- |
+| Frontend | HTML5, CSS3, vanilla JavaScript |
+| Backend | Node.js and Express |
+| Configuration | dotenv and environment variables |
+| AI model family | Gemma (open-weight) |
+| AI inference | Ollama local API or Ollama Cloud API |
+| Voice input | Browser Web Speech API — SpeechRecognition where supported |
+| Voice output | Browser Web Speech API — speechSynthesis |
+| PDF export | Browser print dialog / Save as PDF |
+| License | MIT |
+
+No frontend framework or third-party voice API key is required for the browser-based voice features.
+
+---
+
+## 🗂 Project structure
+
+    campus-sathi-ai/
+    ├── public/
+    │   └── index.html       # UI, styles, interactions, voice, copy and print
+    ├── server.js            # Express server and Ollama integration
+    ├── package.json         # Scripts and dependencies
+    ├── .env.example         # Safe example environment configuration
+    ├── .gitignore           # Excludes secrets and generated files
+    ├── LICENSE              # MIT License
+    └── README.md            # Project documentation
+
+---
 
 ## 🚀 Run locally
 
-### 1. Requirements
+### Requirements
 
-- Node.js 20 or later
+- **Node.js 20 or later**
 - npm
-- Ollama installed and running with a compatible Gemma model available
+- [Ollama](https://ollama.com/) installed and running
+- A compatible Gemma model available in your Ollama installation
 
-### 2. Install
+### 1. Clone the repository
 
     git clone https://github.com/rakibulhasanrakibofficial/campus-sathi-ai.git
     cd campus-sathi-ai
+
+### 2. Install dependencies
+
     npm install
 
-### 3. Start the local model
+### 3. Download a local Gemma model
 
-Make sure Ollama is running, then install the model if it is available in your local Ollama setup:
+The current local default is **gemma4:e2b**. Use the model tag available in your Ollama installation.
 
     ollama pull gemma4:e2b
     ollama list
 
-### 4. Configure the environment
+Make sure the Ollama service is running before starting the app.
 
-Copy .env.example to .env. The local default uses gemma4:e2b. Never commit .env or put API keys in frontend files. If your installed model uses another tag, set OLLAMA_MODEL in .env to that exact tag.
+### 4. Configure environment variables
 
-### 5. Run
+Copy **.env.example** to **.env** and adjust values if needed. The local default expects Ollama at:
+
+    http://127.0.0.1:11434/api/chat
+
+Never commit **.env** or paste a real API key into frontend code or public issues.
+
+### 5. Start the app
 
     npm start
 
-Open http://localhost:3000. The status endpoint is at http://localhost:3000/api/health.
+Open **http://localhost:3000** in your browser.
 
-## ☁️ Deploy
+Development mode with Node's watch mode:
 
-The app can be deployed on a Node.js host such as Render.
+    npm run dev
 
-1. Create a Web Service from this GitHub repository.
-2. Set the build command to: npm install
-3. Set the start command to: npm start
-4. In the host's environment settings, set OLLAMA_API_KEY to your own Ollama Cloud API key.
-5. Set OLLAMA_MODEL to gemma4:31b.
-6. Deploy and open the HTTPS URL provided by the host.
+Health check:
 
-When OLLAMA_API_KEY is present, the backend calls the direct Ollama Cloud API. Use a model tag accepted by the API; this example uses gemma4:31b. Without a key, it uses the local Ollama endpoint; a hosted server cannot access the Ollama process on your personal computer. Never commit the real key. You can optionally override OLLAMA_CLOUD_URL or OLLAMA_LOCAL_URL.
+    http://localhost:3000/api/health
 
-## 🔌 API
+---
+
+## ⚙️ Environment variables
+
+| Variable | Purpose | Default / behavior |
+| --- | --- | --- |
+| **PORT** | Port used by the Express server | **3000** |
+| **OLLAMA_API_KEY** | Enables Ollama Cloud when set | Empty; local Ollama is used when absent |
+| **OLLAMA_MODEL** | Model tag sent to Ollama | **gemma4:e2b** locally; **gemma4:31b** when a Cloud key is present |
+| **OLLAMA_LOCAL_URL** | Local Ollama chat endpoint override | http://127.0.0.1:11434/api/chat |
+| **OLLAMA_CLOUD_URL** | Cloud chat endpoint override | https://ollama.com/api/chat |
+| **AI_TIMEOUT_MS** | AI request timeout in milliseconds | **180000** (180 seconds); the server bounds this setting between 30 and 300 seconds |
+
+For hosted deployment, set the API key in the hosting provider's **secret environment settings**. Do not add the real value to .env.example, README, browser JavaScript, screenshots, or Git history.
+
+---
+
+## 🔌 API reference
+
+The backend exposes two endpoints.
 
 ### GET /api/health
 
-Returns service status, configured provider, model name and voice implementation. It never returns the API key.
+Returns service information, including the configured inference provider and model. The API key is not returned.
+
+Example response:
+
+    {
+      "ok": true,
+      "service": "CampusSathi AI",
+      "provider": "Local Ollama",
+      "model": "gemma4:e2b",
+      "voiceFeatures": "Browser Web Speech API"
+    }
+
+The provider and model fields change according to the server configuration.
 
 ### POST /api/help
 
-Example JSON request:
+Generates an action plan for a campus issue.
+
+Example request:
 
     {
       "problem": "আমাদের ক্যাম্পাসের বাস প্রায়ই দেরিতে আসে।",
@@ -89,37 +248,115 @@ Example JSON request:
       "language": "auto"
     }
 
-Supported language values: auto, bn, en. The API returns JSON containing answer, language, provider and model.
+| Field | Required? | Details |
+| --- | --- | --- |
+| **problem** | Yes | Non-empty string; maximum 2,500 characters |
+| **category** | No | Must match a supported category; otherwise defaults to General campus issue |
+| **location** | No | Optional string, trimmed and limited to 120 characters |
+| **language** | No | **auto**, **bn**, or **en**; defaults to auto if missing or invalid |
 
-## 🎙 Voice notes and browser support
+Example success response shape:
 
-- Voice input is optional; users can always type.
-- Microphone input generally requires HTTPS or localhost and explicit browser permission.
-- Speech-recognition availability differs by browser. Some browsers use an online recognition service.
-- Speech playback uses voices installed or made available by the browser/operating system. Bengali speech output depends on Bengali voice availability on the user's device.
-- This app's backend does not save voice recordings.
+    {
+      "answer": "AI-generated action plan goes here...",
+      "language": "Bengali",
+      "provider": "Local Ollama",
+      "model": "gemma4:e2b"
+    }
 
-## 🧠 Model and AI disclosure
+The answer text is generated by the configured model; it will vary by input.
 
-- **Core model family:** Gemma, an open-weight model family. The configured tag is shown by /api/health.
-- **Inference:** local Ollama by default; Ollama Cloud when OLLAMA_API_KEY is configured.
-- **Task:** understand a student-described campus issue and propose categorized, prioritized next steps.
-- **Proprietary voice model:** none. Text-to-voice uses browser speech synthesis; voice-to-text uses browser speech recognition where supported.
-- **AI-assisted development:** ChatGPT assisted with implementation and documentation during the hackathon. The participant should review, test and understand the code and disclose AI assistance as required by the organizers' rules.
+Common error statuses include:
 
-AI output can be incomplete, inaccurate, biased or inappropriate for a particular institution. Verify important recommendations with official campus sources. Never rely on the app as an emergency service.
+- **400** — missing or too-long problem description.
+- **429** — AI provider rate limit.
+- **502** — provider or authentication error.
+- **503** — connection or timeout issue.
 
-## 🧪 Before submission
+---
 
-- [ ] Test an English issue and confirm the response language.
-- [ ] Test a Bengali-script issue and confirm Bengali headings and guidance.
-- [ ] Try microphone input in a supported browser over HTTPS.
-- [ ] Try Listen and Stop on short and long responses.
-- [ ] Check /api/health on the deployed HTTPS URL.
-- [ ] Confirm the host environment contains OLLAMA_API_KEY and OLLAMA_MODEL=gemma4:31b (do not expose the key).
-- [ ] Add genuine screenshots and the real deployment URL after testing.
-- [ ] Read the event rules and disclose AI-assisted development and model details.
+## 🎤 Voice and browser support
+
+- Microphone access generally requires **HTTPS or localhost** and user permission.
+- SpeechRecognition support varies by browser. Some implementations rely on an online recognition service.
+- Speech playback uses voices made available by the browser or operating system.
+- If no Bengali voice is installed or exposed to the browser, Bengali pronunciation may be inaccurate even when the text is correct.
+- Voice input is only used to fill the problem text field. The app backend does not store voice recordings.
+- Users should review the recognized transcript before submitting it.
+
+---
+
+## 🔐 Privacy, safety, and limitations
+
+- **No app database:** this project does not implement a database for storing reports or user accounts.
+- **No official submission:** CampusSathi does not send complaints to university administration or contact campus staff.
+- **AI processing:** the problem description and optional location are sent to the configured Ollama endpoint to produce the answer. When Cloud mode is enabled, the request goes to Ollama Cloud.
+- **Avoid sensitive information:** do not submit passwords, student IDs, private contact details, medical details, or other sensitive personal information.
+- **Verify recommendations:** AI responses can be incomplete, inaccurate, or unsuitable for your institution. Check important details with official campus sources.
+- **Not an emergency service:** in immediate danger, contact verified campus security or local emergency services.
+- **Voice limitations:** speech-to-text and text-to-speech performance depends on browser support, device settings, installed voices, and network conditions.
+
+---
+
+## 🧠 AI and model disclosure
+
+- **Core model family:** Gemma, an open-weight model family.
+- **Inference runtime:** Ollama.
+- **Local default:** gemma4:e2b.
+- **Cloud default:** gemma4:31b when OLLAMA_API_KEY is configured; the deployment must use a model tag supported by the service.
+- **AI task:** interpret a student-described campus issue and propose concise, prioritized next steps.
+- **Voice technology:** browser-provided Web Speech APIs; no separate proprietary voice model is integrated.
+- **AI-assisted development:** ChatGPT assisted with implementation and documentation. The project owner should review, test, understand, and disclose AI assistance according to the event's rules.
+
+The Gemma model and hosted services may have their own model and service terms, separate from this repository's software license.
+
+---
+
+## ✅ Testing checklist
+
+Use this before presenting or submitting the project:
+
+- [ ] Start Ollama and confirm that the selected model is available.
+- [ ] Open the app and check that the page loads on desktop and mobile.
+- [ ] Submit a Bengali-script campus issue.
+- [ ] Submit an English campus issue.
+- [ ] Try a Banglish issue with the answer language set to automatic.
+- [ ] Change the interface language between Bengali and English.
+- [ ] Try each category, quick-category cards, and an example prompt.
+- [ ] Test a missing problem description and a description near the character limit.
+- [ ] Test microphone input over HTTPS or localhost and review the recognized text.
+- [ ] Test Listen, Stop, and replay with short and long answers.
+- [ ] Check Bengali playback on the target device; confirm a Bengali voice is available.
+- [ ] Test Copy and confirm the clipboard content.
+- [ ] Test Print and choose Save as PDF in the browser dialog.
+- [ ] Check GET /api/health in the local or deployed environment.
+- [ ] Test provider failure or timeout behavior.
+- [ ] Confirm secrets are stored in environment settings and are not committed.
+- [ ] Add real screenshots and the actual public deployment URL after verifying them.
+- [ ] Review event rules and disclose the model and AI-assisted development.
+
+---
+
+## ☁️ Deployment
+
+CampusSathi can be deployed to a Node.js hosting service that supports environment variables and outbound HTTPS. For example, on a Render Web Service:
+
+1. Connect this GitHub repository.
+2. Set **Build Command** to **npm install**.
+3. Set **Start Command** to **npm start**.
+4. Add OLLAMA_API_KEY in the host's secret environment settings.
+5. Set OLLAMA_MODEL to a model tag supported by Ollama Cloud, such as gemma4:31b if available for your account.
+6. Deploy, then open the HTTPS URL from the hosting provider.
+7. Verify /api/health and test a real issue end-to-end.
+
+When OLLAMA_API_KEY is configured, the server uses Ollama Cloud. Without it, the server uses its local Ollama endpoint; a remote host cannot reach the Ollama process running on your personal computer unless you separately configure an accessible endpoint. Never expose the key in frontend code or the public repository.
+
+**Deployment URL:** add the real public HTTPS URL here after a successful deployment and test.
+
+---
 
 ## 📄 License
 
-MIT License. See LICENSE. The Gemma model and related services remain subject to their publisher's model terms and service terms.
+This project is released under the **MIT License**. See [LICENSE](LICENSE).
+
+The repository license covers this project's code. The Gemma model and any hosted inference provider remain subject to their own terms.
