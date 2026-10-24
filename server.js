@@ -162,7 +162,7 @@ app.post("/api/help", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("CampusSathi AI is running on port " + PORT);
   console.log("Provider: " + (IS_CLOUD ? "Ollama Cloud" : "Local Ollama") + " | Model: " + MODEL);
 });
