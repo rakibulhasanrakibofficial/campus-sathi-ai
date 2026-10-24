@@ -1,0 +1,23 @@
+name: Keep CampusSathi AI Warm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check CampusSathi AI health endpoint
+        run: |
+          URL="https://campus-sathi-ai.onrender.com/api/health"
+          echo "Checking $URL"
+          curl --fail --silent --show-error --location --max-time 60 "$URL" -o /tmp/health.json
+          cat /tmp/health.json
+          echo
+          echo "Health endpoint responded successfully."
