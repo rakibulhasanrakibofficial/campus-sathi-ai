@@ -583,6 +583,7 @@ document.querySelectorAll("[data-example]").forEach(button => {
     problemInput.value = uiLanguage === "bn" ? (button.dataset.exampleBn || button.dataset.example) : button.dataset.example;
     categoryInput.value = button.dataset.category;
     charCount.textContent = problemInput.value.length + " / 2500";
+    syncQuickCategoryButtons();
     problemInput.focus();
   });
 });
@@ -591,6 +592,9 @@ function syncQuickCategoryButtons() {
   document.querySelectorAll("[data-quick-category]").forEach(button => {
     const selected = button.dataset.quickCategory === categoryInput.value;
     button.setAttribute("aria-pressed", String(selected));
+
+    const marker = button.querySelector(".category-arrow");
+    if (marker) marker.textContent = selected ? "✓" : "↗";
   });
 }
 
@@ -623,6 +627,7 @@ function resetForm() {
   if (recognition && isListening) recognition.stop();
   form.reset();
   charCount.textContent = "0 / 2500";
+  syncQuickCategoryButtons();
   resultPanel.classList.add("hidden");
   answerBody.replaceChildren();
   currentAnswer = "";
