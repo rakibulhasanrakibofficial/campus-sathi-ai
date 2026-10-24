@@ -70,7 +70,7 @@ The app can be deployed on a Node.js host such as Render.
 5. Set OLLAMA_MODEL to gemma4:cloud.
 6. Deploy and open the HTTPS URL provided by the host.
 
-When OLLAMA_API_KEY is present, the backend calls Ollama Cloud. Without a key, it uses the local Ollama endpoint; a hosted server cannot access the Ollama process on your personal computer. Never commit the real key. You can optionally override OLLAMA_CLOUD_URL or OLLAMA_LOCAL_URL.
+When OLLAMA_API_KEY is present, the backend calls the direct Ollama Cloud API. Use a model tag accepted by the API; this example uses gemma4:31b. Without a key, it uses the local Ollama endpoint; a hosted server cannot access the Ollama process on your personal computer. Never commit the real key. You can optionally override OLLAMA_CLOUD_URL or OLLAMA_LOCAL_URL.
 
 ## 🔌 API
 
@@ -116,7 +116,7 @@ AI output can be incomplete, inaccurate, biased or inappropriate for a particula
 - [ ] Try microphone input in a supported browser over HTTPS.
 - [ ] Try Listen and Stop on short and long responses.
 - [ ] Check /api/health on the deployed HTTPS URL.
-- [ ] Confirm the host environment contains OLLAMA_API_KEY and OLLAMA_MODEL=gemma4:cloud (do not expose the key).
+- [ ] Confirm the host environment contains OLLAMA_API_KEY and OLLAMA_MODEL=gemma4:31b (do not expose the key).
 - [ ] Add genuine screenshots and the real deployment URL after testing.
 - [ ] Read the event rules and disclose AI-assisted development and model details.
 
