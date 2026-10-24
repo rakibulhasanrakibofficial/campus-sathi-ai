@@ -67,7 +67,7 @@ The app can be deployed on a Node.js host such as Render.
 2. Set the build command to: npm install
 3. Set the start command to: npm start
 4. In the host's environment settings, set OLLAMA_API_KEY to your own Ollama Cloud API key.
-5. Set OLLAMA_MODEL to gemma4:cloud.
+5. Set OLLAMA_MODEL to gemma4:31b.
 6. Deploy and open the HTTPS URL provided by the host.
 
 When OLLAMA_API_KEY is present, the backend calls the direct Ollama Cloud API. Use a model tag accepted by the API; this example uses gemma4:31b. Without a key, it uses the local Ollama endpoint; a hosted server cannot access the Ollama process on your personal computer. Never commit the real key. You can optionally override OLLAMA_CLOUD_URL or OLLAMA_LOCAL_URL.
