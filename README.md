@@ -293,6 +293,8 @@ Example request:
 | **location** | No | Optional string, trimmed and limited to 120 characters |
 | **language** | No | **auto**, **bn**, or **en**; defaults to auto if missing or invalid |
 
+In `auto` mode, Bengali script or common Banglish markers select Bengali; otherwise the app defaults to English. Explicit `bn` and `en` selections override automatic detection.
+
 Example success response shape:
 
     {
@@ -359,6 +361,7 @@ Use this before presenting or submitting the project:
 - [ ] Submit a Bengali-script campus issue.
 - [ ] Submit an English campus issue.
 - [ ] Try a Banglish issue with the answer language set to automatic.
+- [ ] Confirm English prompts containing words like "campus", "bus", "class", or "student" still receive English answers.
 - [ ] Change the interface language between Bengali and English.
 - [ ] Try each category, quick-category cards, and an example prompt.
 - [ ] Test a missing problem description and a description near the character limit.
