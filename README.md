@@ -134,6 +134,7 @@ CampusSathi provides guidance only. It does not create a ticket, send a complain
 | Frontend | HTML5, CSS3, vanilla JavaScript |
 | Backend | Node.js and Express |
 | Configuration | dotenv and environment variables |
+| Database connection | MongoDB Atlas via Mongoose (connection layer; report persistence not wired yet) |
 | AI model family | Gemma (open-weight) |
 | AI inference | Ollama local API or Ollama Cloud API |
 | Voice input | Browser Web Speech API — SpeechRecognition where supported |
@@ -192,7 +193,9 @@ Copy **.env.example** to **.env** and adjust values if needed. The local default
 
     http://127.0.0.1:11434/api/chat
 
-Never commit **.env** or paste a real API key into frontend code or public issues.
+Set `MONGODB_URI` to your MongoDB Atlas connection string to enable the backend's MongoDB connection check. If `MONGODB_URI` is empty, the server starts without MongoDB and History remains browser-local. At this stage, MongoDB connection is initialized, but report documents are not yet saved to MongoDB.
+
+Never commit **.env** or paste a real API key or database connection string into frontend code or public issues.
 
 ### 5. Start the app
 
@@ -215,6 +218,7 @@ Health check:
 | Variable | Purpose | Default / behavior |
 | --- | --- | --- |
 | **PORT** | Port used by the Express server | **3000** |
+| **MONGODB_URI** | MongoDB Atlas connection string | Empty; MongoDB connection is skipped when absent |
 | **OLLAMA_API_KEY** | Enables Ollama Cloud when set | Empty; local Ollama is used when absent |
 | **OLLAMA_MODEL** | Model tag sent to Ollama | **gemma4:e2b** locally; **gemma4:31b** when a Cloud key is present |
 | **OLLAMA_LOCAL_URL** | Local Ollama chat endpoint override | http://127.0.0.1:11434/api/chat |
@@ -231,7 +235,7 @@ The backend exposes two endpoints.
 
 ### GET /api/health
 
-Returns service information, including the configured inference provider and model. The API key is not returned.
+Returns service information, including the configured inference provider, model, and MongoDB connection state. No secret values are returned.
 
 Example response:
 
@@ -240,8 +244,11 @@ Example response:
       "service": "CampusSathi AI",
       "provider": "Local Ollama",
       "model": "gemma4:e2b",
+      "database": "connected",
       "voiceFeatures": "Browser Web Speech API"
     }
+
+The `database` field can be `connected`, `disconnected`, or `not_configured`. When `MONGODB_URI` is set, startup waits for MongoDB to connect and exits if the connection fails.
 
 The provider and model fields change according to the server configuration.
 
@@ -298,7 +305,7 @@ Common error statuses include:
 
 ## 🔐 Privacy, safety, and limitations
 
-- **No server-side database:** the project does not implement a database or user accounts. Report history is stored locally in the browser using `localStorage` (up to 50 reports), so it can persist after refresh but does not sync to another device.
+- **History storage:** report history is still stored locally in the browser using `localStorage` (up to 50 reports), so it can persist after refresh but does not sync to another device. MongoDB connection support has been added, but report persistence, user accounts, and authentication are not implemented yet.
 - **No official submission:** CampusSathi does not send complaints to university administration or contact campus staff.
 - **AI processing:** the problem description and optional location are sent to the configured Ollama endpoint to produce the answer. When Cloud mode is enabled, the request goes to Ollama Cloud.
 - **Avoid sensitive information:** do not submit passwords, student IDs, private contact details, medical details, or other sensitive personal information.
@@ -342,6 +349,7 @@ Use this before presenting or submitting the project:
 - [ ] Generate an answer, refresh the page, and confirm that it appears in History.
 - [ ] Reopen a saved report and verify its original problem and answer are restored.
 - [ ] Test deleting one report and clearing all History.
+- [ ] If using MongoDB, set MONGODB_URI and confirm /api/health reports "database": "connected".
 - [ ] Check GET /api/health in the local or deployed environment.
 - [ ] Test provider failure or timeout behavior.
 - [ ] Confirm secrets are stored in environment settings and are not committed.
@@ -357,10 +365,11 @@ CampusSathi can be deployed to a Node.js hosting service that supports environme
 1. Connect this GitHub repository.
 2. Set **Build Command** to **npm install**.
 3. Set **Start Command** to **npm start**.
-4. Add OLLAMA_API_KEY in the host's secret environment settings.
-5. Set OLLAMA_MODEL to a model tag supported by Ollama Cloud, such as gemma4:31b if available for your account.
-6. Deploy, then open the HTTPS URL from the hosting provider.
-7. Verify /api/health and test a real issue end-to-end.
+4. Add `MONGODB_URI` in the host's secret environment settings if you want the backend to connect to Atlas.
+5. Add OLLAMA_API_KEY in the host's secret environment settings.
+6. Set OLLAMA_MODEL to a model tag supported by Ollama Cloud, such as gemma4:31b if available for your account.
+7. Deploy, then open the HTTPS URL from the hosting provider.
+8. Verify /api/health and test a real issue end-to-end.
 
 When OLLAMA_API_KEY is configured, the server uses Ollama Cloud. Without it, the server uses its local Ollama endpoint; a remote host cannot reach the Ollama process running on your personal computer unless you separately configure an accessible endpoint. Never expose the key in frontend code or the public repository.
 
