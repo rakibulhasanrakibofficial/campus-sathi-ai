@@ -314,6 +314,77 @@ textarea:focus, input:focus, select:focus {
 .answer-body h3 { border-left: 2px solid var(--cyan); padding-left: 10px; }
 .result-foot { border-top-color: rgba(164,187,235,.18); }
 .footer { padding-top: 28px; }
+/* Brand and interaction polish */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  padding: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.3);
+  background: linear-gradient(145deg, #0c233e, #18264b);
+  box-shadow: 0 0 0 4px rgba(103,232,249,.055), 0 10px 28px rgba(8,145,178,.18);
+}
+.brand-mark svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 2px 5px rgba(103,232,249,.15)); }
+.brand-name { white-space: nowrap; font-weight: 900; }
+.brand-name .accent {
+  background: linear-gradient(105deg, #67e8f9, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-name .ai-accent {
+  background: linear-gradient(105deg, #c084fc, #f0abfc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.language-control {
+  border-radius: 13px;
+  min-height: 42px;
+  background: linear-gradient(120deg, rgba(34,211,238,.15), rgba(129,140,248,.2), rgba(232,121,249,.12));
+  box-shadow: 0 7px 20px rgba(34,211,238,.06), inset 0 1px rgba(255,255,255,.08);
+}
+.language-control select { cursor: pointer; }
+.btn {
+  min-height: 40px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+}
+.btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,.13), inset 0 1px rgba(255,255,255,.06);
+}
+.btn-primary {
+  min-height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #22d3ee 0%, #818cf8 52%, #e879f9 100%);
+  color: #071426;
+  font-weight: 950;
+  box-shadow: 0 10px 30px rgba(129,140,248,.2), inset 0 1px rgba(255,255,255,.38);
+}
+.btn-primary:hover {
+  background: linear-gradient(110deg, #67e8f9 0%, #a5b4fc 52%, #f0abfc 100%);
+  box-shadow: 0 14px 34px rgba(129,140,248,.25), inset 0 1px rgba(255,255,255,.5);
+}
+.btn-violet {
+  border-color: rgba(129,140,248,.42);
+  background: linear-gradient(120deg, rgba(99,102,241,.2), rgba(34,211,238,.1));
+  color: #e8f5ff;
+}
+.btn-violet:hover { border-color: rgba(103,232,249,.65); }
+#newReport {
+  border-color: rgba(164,187,235,.25);
+  background: rgba(255,255,255,.045);
+}
+#newReport:hover { border-color: rgba(103,232,249,.4); }
+.workflow-step, .category-item, .panel, .hero-side {
+  backdrop-filter: blur(16px);
+}
+.workflow-step { min-height: 68px; }
+.category-item { min-height: 59px; }
+.field-label { color: #f1f5ff; }
+.privacy-note { max-width: 190px; }
+.result-actions .btn { min-height: 36px; }
+
 @media (max-width: 580px) {
   .hero { padding-top: 38px; gap: 18px; }
   h1 { letter-spacing: -2.5px; }
@@ -329,8 +400,17 @@ textarea:focus, input:focus, select:focus {
 <body>
 <header class="shell topbar">
   <a class="brand" href="#" aria-label="CampusSathi home">
-    <span class="brand-mark">C✳</span>
-    <span><span class="brand-name">Campus<span class="accent">Sathi</span> AI</span><span class="brand-caption" data-i18n-bn="আপনার ক্যাম্পাসের সঙ্গী" data-i18n-en="Your campus companion">আপনার ক্যাম্পাসের সঙ্গী</span></span>
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 48 48" role="img" focusable="false">
+        <defs><linearGradient id="campusLogoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset=".58" stop-color="#a5b4fc"/><stop offset="1" stop-color="#c7f36b"/></linearGradient></defs>
+        <path d="M4 15.5 24 6l20 9.5L24 25 4 15.5Z" fill="url(#campusLogoGradient)"/>
+        <path d="M11 20v8.5c7.5 6.3 18.5 6.3 26 0V20l-13 6.2L11 20Z" fill="url(#campusLogoGradient)" opacity=".96"/>
+        <path d="M40 17v10" stroke="#dffaff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="40" cy="30" r="2.2" fill="#c7f36b"/>
+        <path d="M13 35.5h22M17 39.5h14" stroke="#e9faff" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span><span class="brand-name">Campus<span class="accent">Sathi</span> <span class="ai-accent">AI</span></span><span class="brand-caption" data-i18n-bn="আপনার ক্যাম্পাসের সঙ্গী" data-i18n-en="Your campus companion">আপনার ক্যাম্পাসের সঙ্গী</span></span>
   </a>
   <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><label class="language-control" for="uiLanguageSelect"><span aria-hidden="true">🌐</span><select id="uiLanguageSelect" aria-label="Choose interface language"><option value="en">English</option><option value="bn">বাংলা</option></select></label><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
 </header>
@@ -368,14 +448,14 @@ textarea:focus, input:focus, select:focus {
           <div><label class="field-label" for="category" data-i18n-bn="সমস্যার ধরন" data-i18n-en="Problem area">সমস্যার ধরন</label>
             <select id="category" name="category">
               <option value="General campus issue" data-i18n-bn="একটি ধরন বেছে নিন…" data-i18n-en="Choose a category…">একটি ধরন বেছে নিন…</option>
-              <option value="Transport and buses" data-i18n-bn="🚌 যাতায়াত ও বাস" data-i18n-en="🚌 Transport &amp; buses">🚌 যাতায়াত ও বাস</option>
-              <option value="Classes and academics" data-i18n-bn="📚 ক্লাস ও পড়াশোনা" data-i18n-en="📚 Classes &amp; academics">📚 ক্লাস ও পড়াশোনা</option>
-              <option value="Facilities and maintenance" data-i18n-bn="🏫 ভবন ও রক্ষণাবেক্ষণ" data-i18n-en="🏫 Facilities &amp; maintenance">🏫 ভবন ও রক্ষণাবেক্ষণ</option>
-              <option value="Notices and administration" data-i18n-bn="📢 নোটিশ ও প্রশাসন" data-i18n-en="📢 Notices &amp; administration">📢 নোটিশ ও প্রশাসন</option>
-              <option value="Clubs and campus events" data-i18n-bn="🎭 ক্লাব ও ক্যাম্পাস ইভেন্ট" data-i18n-en="🎭 Clubs &amp; campus events">🎭 ক্লাব ও ক্যাম্পাস ইভেন্ট</option>
+              <option value="Transport and buses" data-i18n-bn="🚌 যাতায়াত ও বাস" data-i18n-en="🚌 Transport & buses">🚌 যাতায়াত ও বাস</option>
+              <option value="Classes and academics" data-i18n-bn="📚 ক্লাস ও পড়াশোনা" data-i18n-en="📚 Classes & academics">📚 ক্লাস ও পড়াশোনা</option>
+              <option value="Facilities and maintenance" data-i18n-bn="🏫 ভবন ও রক্ষণাবেক্ষণ" data-i18n-en="🏫 Facilities & maintenance">🏫 ভবন ও রক্ষণাবেক্ষণ</option>
+              <option value="Notices and administration" data-i18n-bn="📢 নোটিশ ও প্রশাসন" data-i18n-en="📢 Notices & administration">📢 নোটিশ ও প্রশাসন</option>
+              <option value="Clubs and campus events" data-i18n-bn="🎭 ক্লাব ও ক্যাম্পাস ইভেন্ট" data-i18n-en="🎭 Clubs & campus events">🎭 ক্লাব ও ক্যাম্পাস ইভেন্ট</option>
               <option value="Student wellbeing" data-i18n-bn="🌱 শিক্ষার্থীর সুস্থতা" data-i18n-en="🌱 Student wellbeing">🌱 শিক্ষার্থীর সুস্থতা</option>
-              <option value="Careers and opportunities" data-i18n-bn="🚀 ক্যারিয়ার ও সুযোগ" data-i18n-en="🚀 Careers &amp; opportunities">🚀 ক্যারিয়ার ও সুযোগ</option>
-              <option value="Safety and accessibility" data-i18n-bn="🛡 নিরাপত্তা ও সহজ প্রবেশ" data-i18n-en="🛡 Safety &amp; accessibility">🛡 নিরাপত্তা ও সহজ প্রবেশ</option>
+              <option value="Careers and opportunities" data-i18n-bn="🚀 ক্যারিয়ার ও সুযোগ" data-i18n-en="🚀 Careers & opportunities">🚀 ক্যারিয়ার ও সুযোগ</option>
+              <option value="Safety and accessibility" data-i18n-bn="🛡 নিরাপত্তা ও সহজ প্রবেশ" data-i18n-en="🛡 Safety & accessibility">🛡 নিরাপত্তা ও সহজ প্রবেশ</option>
             </select>
           </div>
           <div><label class="field-label" for="location"><span data-i18n-bn="ক্যাম্পাসের কোথায়?" data-i18n-en="Campus location">ক্যাম্পাসের কোথায়?</span><small data-i18n-bn="ইচ্ছা হলে দিন" data-i18n-en="Optional">ইচ্ছা হলে দিন</small></label><input id="location" name="location" type="text" maxlength="120" placeholder="যেমন: প্রধান ফটক, ভবন ২" data-placeholder-bn="যেমন: প্রধান ফটক, ভবন ২" data-placeholder-en="e.g. Main gate, building 2"></div>
