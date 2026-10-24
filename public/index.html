@@ -586,7 +586,7 @@ textarea:focus, input:focus, select:focus {
           <div><label class="field-label" for="location"><span data-i18n-bn="ক্যাম্পাসের কোথায়?" data-i18n-en="Campus location">ক্যাম্পাসের কোথায়?</span><small data-i18n-bn="ইচ্ছা হলে দিন" data-i18n-en="Optional">ইচ্ছা হলে দিন</small></label><input id="location" name="location" type="text" maxlength="120" placeholder="যেমন: প্রধান ফটক, ভবন ২" data-placeholder-bn="যেমন: প্রধান ফটক, ভবন ২" data-placeholder-en="e.g. Main gate, building 2"></div>
         </div>
         <div class="field-row">
-          <div><label class="field-label" for="replyLanguage" data-i18n-bn="উত্তরের ভাষা" data-i18n-en="Answer language">উত্তরের ভাষা</label><select id="replyLanguage" name="language"><option value="auto" data-i18n-bn="প্রশ্নের ভাষা অনুযায়ী" data-i18n-en="Match my message">প্রশ্নের ভাষা অনুযায়ী</option><option value="bn">বাংলা</option><option value="en">English</option></select></div>
+          <div><label class="field-label" for="replyLanguage"><span data-i18n-bn="উত্তরের ভাষা (আবশ্যক)" data-i18n-en="Answer language (required)">উত্তরের ভাষা (আবশ্যক)</span><span aria-hidden="true"> *</span></label><select id="replyLanguage" name="language" required aria-required="true"><option value="" selected disabled data-i18n-bn="উত্তরের ভাষা বেছে নিন…" data-i18n-en="Select answer language…">উত্তরের ভাষা বেছে নিন…</option><option value="bn">বাংলা</option><option value="en">English</option></select><small class="field-help" id="replyLanguageHelp" data-i18n-bn="AI উত্তর পেতে আগে বাংলা অথবা English নির্বাচন করুন।" data-i18n-en="Choose Bengali or English before requesting an AI answer.">AI উত্তর পেতে আগে বাংলা অথবা English নির্বাচন করুন।</small></div>
           <div><label class="field-label" for="speechLanguage" data-i18n-bn="কথা বলার ভাষা" data-i18n-en="Mic language">কথা বলার ভাষা</label><select id="speechLanguage" name="speechLanguage"><option value="bn-BD">বাংলা (বাংলাদেশ)</option><option value="en-US">English (US)</option><option value="en-GB">English (UK)</option></select></div>
         </div>
 
@@ -654,6 +654,7 @@ const problemInput = document.getElementById("problem");
 const categoryInput = document.getElementById("category");
 const locationInput = document.getElementById("location");
 const replyLanguage = document.getElementById("replyLanguage");
+replyLanguage.addEventListener("change", () => replyLanguage.setCustomValidity(""));
 const speechLanguage = document.getElementById("speechLanguage");
 const submitBtn = document.getElementById("submitBtn");
 const submitLabel = document.getElementById("submitLabel");
@@ -1201,6 +1202,13 @@ function showError(message) {
 form.addEventListener("submit", async event => {
   event.preventDefault();
   const problem = problemInput.value.trim();
+  if (!["bn", "en"].includes(replyLanguage.value)) {
+    replyLanguage.setCustomValidity(tr("AI উত্তর পেতে বাংলা অথবা English নির্বাচন করুন।", "Select Bengali or English to get an AI answer."));
+    replyLanguage.reportValidity();
+    replyLanguage.focus();
+    return;
+  }
+  replyLanguage.setCustomValidity("");
   if (!problem) { problemInput.focus(); return; }
   submitBtn.disabled = true;
   submitLabel.textContent = tr("Gemma উত্তর তৈরি করছে…", "Thinking with Gemma…");
