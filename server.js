@@ -11,6 +11,7 @@ const MODEL = process.env.OLLAMA_MODEL || (IS_CLOUD ? "gemma4:cloud" : "gemma4:e
 const CLOUD_URL = process.env.OLLAMA_CLOUD_URL || "https://ollama.com/api/chat";
 const LOCAL_URL = process.env.OLLAMA_LOCAL_URL || "http://127.0.0.1:11434/api/chat";
 const OLLAMA_URL = IS_CLOUD ? CLOUD_URL : LOCAL_URL;
+const AI_TIMEOUT_MS = Math.max(30000, Math.min(Number(process.env.AI_TIMEOUT_MS) || 180000, 300000));
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "20kb" }));
@@ -86,16 +87,14 @@ app.post("/api/help", async (req, res) => {
     {
       role: "system",
       content: [
-        "You are CampusSathi AI, a helpful campus-life assistant powered by the Gemma open-weight model.",
-        "Help university students reason through everyday campus issues such as transport, classes, notices, facilities, student clubs, accessibility, careers and wellbeing.",
+        "You are CampusSathi AI, a concise and practical university-life assistant powered by Gemma.",
         languageRules,
         headings,
-        "Give a short, practical, non-judgmental plan with three prioritized actions. Use the supplied category as context, not as proof.",
-        "Do not pretend to file an official report or contact the university. Never invent campus policies, office names, phone numbers, opening hours or URLs.",
-        "For immediate danger or a medical emergency, advise the student to contact verified local emergency services or campus security. Do not present AI-generated advice as official university guidance.",
-        "Do not ask the user to share passwords, student ID numbers, private phone numbers or other sensitive data.",
-        "End with one concise verification note reminding the student to confirm important details with official campus sources."
-      ].join("\n\n")
+        "Write at most 220 words. Give exactly three prioritized actions. Use the selected category and location only as user-provided context.",
+        "Never claim to submit reports, contact university staff, or know unverified campus policies, contacts, hours, or URLs.",
+        "For immediate danger, tell the user to contact verified campus security or local emergency services. Do not request passwords, student IDs, or private personal data.",
+        "End with one short reminder to verify important details with official campus sources."
+      ].join("\n")
     },
     {
       role: "user",
@@ -119,9 +118,9 @@ app.post("/api/help", async (req, res) => {
         messages,
         stream: false,
         think: false,
-        options: { temperature: 0.35, num_predict: 850 }
+        options: { temperature: 0.25, num_predict: 450 }
       }),
-      signal: AbortSignal.timeout(90000)
+      signal: AbortSignal.timeout(AI_TIMEOUT_MS)
     });
 
     const data = await response.json().catch(() => ({}));
@@ -154,11 +153,11 @@ app.post("/api/help", async (req, res) => {
       model: MODEL
     });
   } catch (error) {
-    console.error("AI request failed:", error.message);
+    console.error("AI request failed:", error.name, error.message);
     return res.status(503).json({
-      error: error.name === "TimeoutError"
-        ? "The AI took too long to respond. Please retry."
-        : "Could not connect to the AI model. Check the API key or local Ollama service."
+      error: error.name === "TimeoutError" || error.name === "AbortError"
+        ? "The AI provider did not respond in time. Please retry. If this keeps happening, check the server logs and AI provider configuration."
+        : "Could not connect to the AI model. Check the API key, network, or local Ollama service."
     });
   }
 });
