@@ -94,14 +94,15 @@ The form supports these categories:
 
 The sidebar also has clickable quick-category cards. Example prompts can fill the form and select a matching category, helping new users get started quickly.
 
-### 📚 Local report history
+### 📚 Saved report history
 
-- Successfully generated reports are saved automatically in the browser’s `localStorage`.
-- Open the **History** control to see saved reports, with their date, category, language, and a short answer preview.
-- Reopen a saved report to view the original answer again; the answer can still be listened to, copied, or printed as a PDF.
-- Delete one report or clear all saved reports. Destructive actions ask for confirmation.
-- History is limited to the **50 most recent reports** and stays in the same browser profile/device. It does not sync between devices and is not stored in the app’s server database.
-- Anyone with access to the same browser profile may be able to see the saved history. Clear it on shared devices and avoid sensitive information.
+- Successfully generated reports are saved in the browser’s `localStorage` for quick access.
+- When `MONGODB_URI` is configured, History is also stored in MongoDB through the backend API.
+- On first connection, existing browser-local reports are migrated into MongoDB when they are not already present there.
+- Open the **History** control to reopen a saved report, listen to its answer, copy it, print it, delete one item, or clear all items.
+- History is limited to the **50 most recent reports per browser profile**.
+- This project does not have user accounts yet. A random HttpOnly browser cookie scopes MongoDB records to that browser; clearing the cookie can disconnect you from its earlier database History. History does not automatically sync across devices.
+- If MongoDB is not configured or becomes unavailable, the app keeps using browser-local History. Avoid sensitive personal information and clear History on shared devices.
 
 ### 🧩 Helpful interface details
 
@@ -193,9 +194,11 @@ Copy **.env.example** to **.env** and adjust values if needed. The local default
 
     http://127.0.0.1:11434/api/chat
 
-Set `MONGODB_URI` to your MongoDB Atlas connection string to enable the backend's MongoDB connection check. If `MONGODB_URI` is empty, the server starts without MongoDB and History remains browser-local. At this stage, MongoDB connection is initialized, but report documents are not yet saved to MongoDB.
+To enable persistent History, set `MONGODB_URI` to your MongoDB Atlas connection string. Copy the complete URI from Atlas, replace its database username/password placeholders, and URL-encode any special characters in the username or password. In Atlas, allow your application host's IP address in Network Access and ensure the database user has appropriate read/write permissions. Do not expose this URI in the frontend or commit it.
 
-Never commit **.env** or paste a real API key or database connection string into frontend code or public issues.
+If `MONGODB_URI` is empty, the server starts without MongoDB and History remains browser-local. When the URI is set but the database cannot be reached, startup fails instead of silently pretending the database is connected.
+
+Never commit **.env** or paste a real API key or database connection string into frontend code, screenshots, or public issues.
 
 ### 5. Start the app
 
@@ -231,7 +234,7 @@ For hosted deployment, set the API key in the hosting provider's **secret enviro
 
 ## 🔌 API reference
 
-The backend exposes two endpoints.
+The backend exposes a health endpoint, the AI endpoint, and browser-scoped History endpoints.
 
 ### GET /api/health
 
@@ -251,6 +254,24 @@ Example response:
 The `database` field can be `connected`, `disconnected`, or `not_configured`. When `MONGODB_URI` is set, startup waits for MongoDB to connect and exits if the connection fails.
 
 The provider and model fields change according to the server configuration.
+
+### GET /api/history
+
+Returns up to the 50 most recent History records for the current browser. The backend creates a random `HttpOnly; SameSite=Lax` cookie to scope records to that browser. This is browser-scoped storage, not a user account or identity system.
+
+### POST /api/history
+
+Creates or updates one History record. The body uses the fields `id`, `createdAt`, `problem`, `category`, `location`, `requestedLanguage`, `answerLanguage`, and `answer`. The server validates the input and retains at most 50 recent entries per browser.
+
+### DELETE /api/history/:id
+
+Deletes one History record owned by the current browser.
+
+### DELETE /api/history
+
+Clears all History records owned by the current browser.
+
+History endpoints return **503** when MongoDB is not connected. The frontend then continues with browser-local History instead.
 
 ### POST /api/help
 
@@ -305,7 +326,7 @@ Common error statuses include:
 
 ## 🔐 Privacy, safety, and limitations
 
-- **History storage:** report history is still stored locally in the browser using `localStorage` (up to 50 reports), so it can persist after refresh but does not sync to another device. MongoDB connection support has been added, but report persistence, user accounts, and authentication are not implemented yet.
+- **History storage:** report history is stored in browser `localStorage` and, when configured, in MongoDB (up to 50 reports per browser). MongoDB records are scoped by an HttpOnly browser cookie; this is not authentication, user identity, or cross-device sync. Clearing the browser cookie can disconnect it from earlier server-side History.
 - **No official submission:** CampusSathi does not send complaints to university administration or contact campus staff.
 - **AI processing:** the problem description and optional location are sent to the configured Ollama endpoint to produce the answer. When Cloud mode is enabled, the request goes to Ollama Cloud.
 - **Avoid sensitive information:** do not submit passwords, student IDs, private contact details, medical details, or other sensitive personal information.
@@ -349,7 +370,10 @@ Use this before presenting or submitting the project:
 - [ ] Generate an answer, refresh the page, and confirm that it appears in History.
 - [ ] Reopen a saved report and verify its original problem and answer are restored.
 - [ ] Test deleting one report and clearing all History.
-- [ ] If using MongoDB, set MONGODB_URI and confirm /api/health reports "database": "connected".
+- [ ] Set MONGODB_URI and confirm /api/health reports "database": "connected".
+- [ ] Confirm GET /api/history returns an items array when MongoDB is enabled.
+- [ ] Generate a report, refresh the page, then confirm it is still visible in History.
+- [ ] Delete one report and clear History; confirm both actions persist after refresh.
 - [ ] Check GET /api/health in the local or deployed environment.
 - [ ] Test provider failure or timeout behavior.
 - [ ] Confirm secrets are stored in environment settings and are not committed.
