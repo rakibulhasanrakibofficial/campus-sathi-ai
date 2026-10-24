@@ -97,12 +97,10 @@ The sidebar also has clickable quick-category cards. Example prompts can fill th
 ### 📚 Saved report history
 
 - Successfully generated reports are saved in the browser’s `localStorage` for quick access.
-- When `MONGODB_URI` is configured, History is also stored in MongoDB through the backend API.
-- On first connection, existing browser-local reports are migrated into MongoDB when they are not already present there.
+- History remains in this browser profile’s `localStorage`; it is not uploaded to the server.
 - Open the **History** control to reopen a saved report, listen to its answer, copy it, print it, delete one item, or clear all items.
 - History is limited to the **50 most recent reports per browser profile**.
-- This project does not have user accounts yet. A random HttpOnly browser cookie scopes MongoDB records to that browser; clearing the cookie can disconnect you from its earlier database History. History does not automatically sync across devices.
-- If MongoDB is not configured or becomes unavailable, the app keeps using browser-local History. Avoid sensitive personal information and clear History on shared devices.
+- History is browser-local and does not sync across devices or browsers. Clearing browser site data may remove the saved History. Avoid sensitive personal information and clear History on shared devices.
 
 ### 🧩 Helpful interface details
 
@@ -135,7 +133,7 @@ CampusSathi provides guidance only. It does not create a ticket, send a complain
 | Frontend | HTML5, CSS3, vanilla JavaScript |
 | Backend | Node.js and Express |
 | Configuration | dotenv and environment variables |
-| Database connection | MongoDB Atlas via Mongoose (connection layer; report persistence not wired yet) |
+| Report History | Browser `localStorage` (up to 50 reports; no database required) |
 | AI model family | Gemma (open-weight) |
 | AI inference | Ollama local API or Ollama Cloud API |
 | Voice input | Browser Web Speech API — SpeechRecognition where supported |
@@ -194,11 +192,9 @@ Copy **.env.example** to **.env** and adjust values if needed. The local default
 
     http://127.0.0.1:11434/api/chat
 
-To enable persistent History, set `MONGODB_URI` to your MongoDB Atlas connection string. Copy the complete URI from Atlas, replace its database username/password placeholders, and URL-encode any special characters in the username or password. In Atlas, allow your application host's IP address in Network Access and ensure the database user has appropriate read/write permissions. Do not expose this URI in the frontend or commit it.
+Copy `.env.example` to `.env` and configure an AI provider only if needed. History uses browser `localStorage`; you do not need a database, database account, or database connection string.
 
-If `MONGODB_URI` is empty, the server starts without MongoDB and History remains browser-local. When the URI is set but the database cannot be reached, startup fails instead of silently pretending the database is connected.
-
-Never commit **.env** or paste a real API key or database connection string into frontend code, screenshots, or public issues.
+Never commit **.env** or paste a real API key into frontend code, screenshots, or public issues.
 
 ### 5. Start the app
 
@@ -221,7 +217,6 @@ Health check:
 | Variable | Purpose | Default / behavior |
 | --- | --- | --- |
 | **PORT** | Port used by the Express server | **3000** |
-| **MONGODB_URI** | MongoDB Atlas connection string | Empty; MongoDB connection is skipped when absent |
 | **OLLAMA_API_KEY** | Enables Ollama Cloud when set | Empty; local Ollama is used when absent |
 | **OLLAMA_MODEL** | Model tag sent to Ollama | **gemma4:e2b** locally; **gemma4:31b** when a Cloud key is present |
 | **OLLAMA_LOCAL_URL** | Local Ollama chat endpoint override | http://127.0.0.1:11434/api/chat |
@@ -238,7 +233,7 @@ The backend exposes a health endpoint, the AI endpoint, and browser-scoped Histo
 
 ### GET /api/health
 
-Returns service information, including the configured inference provider, model, and MongoDB connection state. No secret values are returned.
+Returns service information, including the configured inference provider and model. No secret values are returned.
 
 Example response:
 
@@ -247,31 +242,10 @@ Example response:
       "service": "CampusSathi AI",
       "provider": "Local Ollama",
       "model": "gemma4:e2b",
-      "database": "connected",
       "voiceFeatures": "Browser Web Speech API"
     }
 
-The `database` field can be `connected`, `disconnected`, or `not_configured`. When `MONGODB_URI` is set, startup waits for MongoDB to connect and exits if the connection fails.
-
 The provider and model fields change according to the server configuration.
-
-### GET /api/history
-
-Returns up to the 50 most recent History records for the current browser. The backend creates a random `HttpOnly; SameSite=Lax` cookie to scope records to that browser. This is browser-scoped storage, not a user account or identity system.
-
-### POST /api/history
-
-Creates or updates one History record. The body uses the fields `id`, `createdAt`, `problem`, `category`, `location`, `requestedLanguage`, `answerLanguage`, and `answer`. The server validates the input and retains at most 50 recent entries per browser.
-
-### DELETE /api/history/:id
-
-Deletes one History record owned by the current browser.
-
-### DELETE /api/history
-
-Clears all History records owned by the current browser.
-
-History endpoints return **503** when MongoDB is not connected. The frontend then continues with browser-local History instead.
 
 ### POST /api/help
 
@@ -326,7 +300,7 @@ Common error statuses include:
 
 ## 🔐 Privacy, safety, and limitations
 
-- **History storage:** report history is stored in browser `localStorage` and, when configured, in MongoDB (up to 50 reports per browser). MongoDB records are scoped by an HttpOnly browser cookie; this is not authentication, user identity, or cross-device sync. Clearing the browser cookie can disconnect it from earlier server-side History.
+- **History storage:** report history is stored only in the current browser’s `localStorage` (up to 50 reports). It does not sync across browsers/devices; clearing the browser’s site data may remove it.
 - **No official submission:** CampusSathi does not send complaints to university administration or contact campus staff.
 - **AI processing:** the problem description and optional location are sent to the configured Ollama endpoint to produce the answer. When Cloud mode is enabled, the request goes to Ollama Cloud.
 - **Avoid sensitive information:** do not submit passwords, student IDs, private contact details, medical details, or other sensitive personal information.
@@ -370,10 +344,8 @@ Use this before presenting or submitting the project:
 - [ ] Generate an answer, refresh the page, and confirm that it appears in History.
 - [ ] Reopen a saved report and verify its original problem and answer are restored.
 - [ ] Test deleting one report and clearing all History.
-- [ ] Set MONGODB_URI and confirm /api/health reports "database": "connected".
-- [ ] Confirm GET /api/history returns an items array when MongoDB is enabled.
-- [ ] Generate a report, refresh the page, then confirm it is still visible in History.
-- [ ] Delete one report and clear History; confirm both actions persist after refresh.
+- [ ] Generate a report, refresh the page, and confirm it is still visible in History.
+- [ ] Delete one report and clear History; confirm the browser History updates after each action.
 - [ ] Check GET /api/health in the local or deployed environment.
 - [ ] Test provider failure or timeout behavior.
 - [ ] Confirm secrets are stored in environment settings and are not committed.
@@ -389,7 +361,6 @@ CampusSathi can be deployed to a Node.js hosting service that supports environme
 1. Connect this GitHub repository.
 2. Set **Build Command** to **npm install**.
 3. Set **Start Command** to **npm start**.
-4. Add `MONGODB_URI` in the host's secret environment settings if you want the backend to connect to Atlas.
 5. Add OLLAMA_API_KEY in the host's secret environment settings.
 6. Set OLLAMA_MODEL to a model tag supported by Ollama Cloud, such as gemma4:31b if available for your account.
 7. Deploy, then open the HTTPS URL from the hosting provider.

@@ -2,12 +2,9 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
-const mongoose = require("mongoose");
-const crypto = require("crypto");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const MONGODB_URI = (process.env.MONGODB_URI || "").trim();
 const CLOUD_KEY = (process.env.OLLAMA_API_KEY || "").trim();
 const IS_CLOUD = Boolean(CLOUD_KEY);
 const MODEL = process.env.OLLAMA_MODEL || (IS_CLOUD ? "gemma4:31b" : "gemma4:e2b");
@@ -32,64 +29,6 @@ const ALLOWED_CATEGORIES = new Set([
   "Safety and accessibility"
 ]);
 
-
-const historySchema = new mongoose.Schema({
-  browserIdHash: { type: String, required: true, index: true },
-  clientRecordId: { type: String, required: true },
-  createdAt: { type: Date, required: true, default: Date.now },
-  problem: { type: String, required: true, maxlength: 2500 },
-  category: { type: String, required: true, maxlength: 100 },
-  location: { type: String, default: "", maxlength: 120 },
-  requestedLanguage: { type: String, enum: ["auto", "bn", "en"], default: "auto" },
-  answerLanguage: { type: String, enum: ["Bengali", "English"], default: "English" },
-  answer: { type: String, required: true, maxlength: 12000 }
-}, { versionKey: false });
-
-historySchema.index({ browserIdHash: 1, clientRecordId: 1 }, { unique: true });
-const HistoryRecord = mongoose.models.CampusSathiHistory ||
-  mongoose.model("CampusSathiHistory", historySchema);
-
-function getHistoryOwnerHash(req, res) {
-  const cookieName = "campus_sathi_history";
-  const cookiePrefix = cookieName + "=";
-  const cookie = (req.headers.cookie || "")
-    .split(";")
-    .map(part => part.trim())
-    .find(part => part.startsWith(cookiePrefix));
-  let token = cookie ? cookie.slice(cookiePrefix.length) : "";
-
-  if (!/^[a-f0-9]{64}$/.test(token)) {
-    token = crypto.randomBytes(32).toString("hex");
-    const forwardedProto = String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim();
-    const secure = process.env.NODE_ENV === "production" || req.secure || forwardedProto === "https" ? "; Secure" : "";
-    res.setHeader(
-      "Set-Cookie",
-      cookieName + "=" + token + "; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax" + secure
-    );
-  }
-
-  return crypto.createHash("sha256").update(token).digest("hex");
-}
-
-function historyIsConnected(res) {
-  if (mongoose.connection.readyState === 1) return true;
-  res.setHeader("Cache-Control", "no-store");
-  res.status(503).json({ error: "MongoDB History is unavailable. Check MONGODB_URI and the database connection." });
-  return false;
-}
-
-function toPublicHistoryRecord(record) {
-  return {
-    id: record.clientRecordId,
-    createdAt: new Date(record.createdAt).toISOString(),
-    problem: record.problem,
-    category: record.category,
-    location: record.location || "",
-    requestedLanguage: record.requestedLanguage || "auto",
-    answerLanguage: record.answerLanguage || "English",
-    answer: record.answer
-  };
-}
 
 function hasBengaliScript(value) {
   return Array.from(value).some(char => {
@@ -116,119 +55,10 @@ app.get("/api/health", (_req, res) => {
     service: "CampusSathi AI",
     provider: IS_CLOUD ? "Ollama Cloud" : "Local Ollama",
     model: MODEL,
-    database: mongoose.connection.readyState === 1 ? "connected" : (MONGODB_URI ? "disconnected" : "not_configured"),
     voiceFeatures: "Browser Web Speech API"
   });
 });
 
-
-app.get("/api/history", async (req, res) => {
-  if (!historyIsConnected(res)) return;
-  try {
-    const browserIdHash = getHistoryOwnerHash(req, res);
-    const records = await HistoryRecord.find({ browserIdHash })
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .lean();
-    res.setHeader("Cache-Control", "no-store");
-    return res.json({ items: records.map(toPublicHistoryRecord) });
-  } catch (error) {
-    console.error("History read failed:", error.message);
-    return res.status(500).json({ error: "Could not load saved History." });
-  }
-});
-
-app.post("/api/history", async (req, res) => {
-  if (!historyIsConnected(res)) return;
-  const body = req.body || {};
-  const id = typeof body.id === "string" ? body.id.trim() : "";
-  const problem = typeof body.problem === "string" ? body.problem.trim() : "";
-  const answer = typeof body.answer === "string" ? body.answer.trim() : "";
-
-  if (!/^[A-Za-z0-9_-]{1,100}$/.test(id)) {
-    return res.status(400).json({ error: "A valid History record ID is required." });
-  }
-  if (!problem || problem.length > 2500) {
-    return res.status(400).json({ error: "Problem must contain 1 to 2500 characters." });
-  }
-  if (!answer || answer.length > 12000) {
-    return res.status(400).json({ error: "Answer must contain 1 to 12000 characters." });
-  }
-
-  const requestedLanguage = ["auto", "bn", "en"].includes(body.requestedLanguage)
-    ? body.requestedLanguage
-    : "auto";
-  const category = typeof body.category === "string" && ALLOWED_CATEGORIES.has(body.category)
-    ? body.category
-    : "General campus issue";
-  const location = typeof body.location === "string" ? body.location.trim().slice(0, 120) : "";
-  const answerLanguage = body.answerLanguage === "Bengali" ? "Bengali" : "English";
-  const parsedDate = new Date(body.createdAt || Date.now());
-  const createdAt = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
-
-  try {
-    const browserIdHash = getHistoryOwnerHash(req, res);
-    const record = await HistoryRecord.findOneAndUpdate(
-      { browserIdHash, clientRecordId: id },
-      {
-        $set: { problem, category, location, requestedLanguage, answerLanguage, answer },
-        $setOnInsert: { browserIdHash, clientRecordId: id, createdAt }
-      },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
-    );
-
-    const overflow = await HistoryRecord.find({ browserIdHash })
-      .sort({ createdAt: -1 })
-      .skip(50)
-      .select("_id")
-      .lean();
-    if (overflow.length) {
-      await HistoryRecord.deleteMany({
-        browserIdHash,
-        _id: { $in: overflow.map(item => item._id) }
-      });
-    }
-
-    res.setHeader("Cache-Control", "no-store");
-    return res.status(200).json({ item: toPublicHistoryRecord(record) });
-  } catch (error) {
-    console.error("History save failed:", error.message);
-    return res.status(500).json({ error: "Could not save this History record." });
-  }
-});
-
-app.delete("/api/history/:id", async (req, res) => {
-  if (!historyIsConnected(res)) return;
-  const id = typeof req.params.id === "string" ? req.params.id : "";
-  if (!/^[A-Za-z0-9_-]{1,100}$/.test(id)) {
-    return res.status(400).json({ error: "A valid History record ID is required." });
-  }
-  try {
-    const browserIdHash = getHistoryOwnerHash(req, res);
-    const result = await HistoryRecord.deleteOne({ browserIdHash, clientRecordId: id });
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: "History record not found." });
-    }
-    res.setHeader("Cache-Control", "no-store");
-    return res.json({ deleted: true });
-  } catch (error) {
-    console.error("History delete failed:", error.message);
-    return res.status(500).json({ error: "Could not delete this History record." });
-  }
-});
-
-app.delete("/api/history", async (req, res) => {
-  if (!historyIsConnected(res)) return;
-  try {
-    const browserIdHash = getHistoryOwnerHash(req, res);
-    await HistoryRecord.deleteMany({ browserIdHash });
-    res.setHeader("Cache-Control", "no-store");
-    return res.json({ cleared: true });
-  } catch (error) {
-    console.error("History clear failed:", error.message);
-    return res.status(500).json({ error: "Could not clear saved History." });
-  }
-});
 
 app.post("/api/help", async (req, res) => {
   const body = req.body || {};
@@ -334,26 +164,8 @@ app.post("/api/help", async (req, res) => {
   }
 });
 
-async function startServer() {
-  if (MONGODB_URI) {
-    try {
-      await mongoose.connect(MONGODB_URI, {
-        serverSelectionTimeoutMS: 10000
-      });
-      console.log("MongoDB connected successfully.");
-    } catch (error) {
-      console.error("MongoDB connection failed:", error.message);
-      process.exit(1);
-    }
-  } else {
-    console.warn("MONGODB_URI is not set. Starting without MongoDB; saved History is still browser-local.");
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log("CampusSathi AI is running on port " + PORT);
-    console.log("Provider: " + (IS_CLOUD ? "Ollama Cloud" : "Local Ollama") + " | Model: " + MODEL);
-    console.log("Database: " + (mongoose.connection.readyState === 1 ? "MongoDB connected" : "not configured"));
-  });
-}
-
-startServer();
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("CampusSathi AI is running on port " + PORT);
+  console.log("Provider: " + (IS_CLOUD ? "Ollama Cloud" : "Local Ollama") + " | Model: " + MODEL);
+  console.log("History: browser localStorage (no database required)");
+});

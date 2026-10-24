@@ -477,7 +477,7 @@ textarea:focus, input:focus, select:focus {
 }
 
 
-/* Persistent History UI (MongoDB when configured, browser-local fallback) */
+/* Browser-local report history */
 .history-count {
   display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px;
   border-radius: 999px; color: #062b2b; background: #5eead4; font-size: 11px; font-weight: 950;
@@ -641,7 +641,7 @@ textarea:focus, input:focus, select:focus {
         <button class="btn btn-small" id="closeHistoryBtn" type="button" data-i18n-bn="বন্ধ করুন" data-i18n-en="Close">Close</button>
       </div>
     </div>
-    <p class="history-privacy-note" data-i18n-bn="MongoDB সেট করা থাকলে History database-এ এবং এই browser-এ রাখা হয়। MongoDB না থাকলে শুধু browser-এ থাকে। এটি account login নয়; cookie মুছে গেলে আগের database History-এর সঙ্গে সংযোগ হারাতে পারেন। Shared device হলে History মুছে দিন।" data-i18n-en="When MongoDB is configured, History is saved in the database as well as this browser. Without MongoDB, it stays browser-local. This is not an account login; clearing this browser's cookie can disconnect it from its previous database History. Clear History on shared devices.">When MongoDB is configured, History is saved in the database as well as this browser. Without MongoDB, it stays browser-local. This is not an account login; clearing this browser's cookie can disconnect it from its previous database History. Clear History on shared devices.</p>
+    <p class="history-privacy-note" data-i18n-bn="History এই browser/device-এর localStorage-এ থাকে, server বা database-এ নয়। Shared device হলে ব্যবহার শেষে history মুছে দিন।" data-i18n-en="History stays in this browser/device's localStorage, not on the server or in a database. Clear it on shared devices.">History stays in this browser/device's localStorage, not on the server or in a database. Clear it on shared devices.</p>
     <p class="history-empty" id="historyEmpty" data-i18n-bn="এখনো কোনো সংরক্ষিত রিপোর্ট নেই। একটি AI উত্তর তৈরি করলে এখানে দেখা যাবে।" data-i18n-en="No saved reports yet. Generate an AI answer and it will appear here.">No saved reports yet. Generate an AI answer and it will appear here.</p>
     <div class="history-list" id="historyList"></div>
   </section>
@@ -733,120 +733,19 @@ function loadHistory() {
   }
 }
 
-let historyApiEnabled = false;
-
-async function historyApiRequest(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    cache: "no-store",
-    credentials: "same-origin"
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "History API request failed.");
-  return data;
-}
-
-async function syncHistoryChanges(previousHistory, nextHistory) {
-  if (!historyApiEnabled) return;
-  if (previousHistory.length > 0 && nextHistory.length === 0) {
-    await historyApiRequest("/api/history", { method: "DELETE" });
-    return;
-  }
-
-  const previousById = new Map(previousHistory.map(record => [record.id, record]));
-  const nextById = new Map(nextHistory.map(record => [record.id, record]));
-  const requests = [];
-
-  for (const [id, record] of nextById) {
-    if (JSON.stringify(previousById.get(id)) !== JSON.stringify(record)) {
-      requests.push(historyApiRequest("/api/history", {
-        method: "POST",
-        body: JSON.stringify(record)
-      }));
-    }
-  }
-  for (const id of previousById.keys()) {
-    if (!nextById.has(id)) {
-      requests.push(historyApiRequest("/api/history/" + encodeURIComponent(id), {
-        method: "DELETE"
-      }));
-    }
-  }
-
-  await Promise.all(requests);
-}
-
 function persistHistory(nextHistory) {
-  const previousHistory = reportHistory;
   try {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
     reportHistory = nextHistory;
     renderHistoryCount();
     renderHistoryList();
-
-    if (historyApiEnabled) {
-      syncHistoryChanges(previousHistory, nextHistory).catch(error => {
-        historyApiEnabled = false;
-        voiceStatus.textContent = tr(
-          "MongoDB History সংযোগ বিচ্ছিন্ন। আপাতত এই browser-এ সংরক্ষণ হচ্ছে।",
-          "MongoDB History is unavailable. Changes are being kept in this browser for now."
-        );
-        console.error("History sync failed:", error.message);
-      });
-    }
     return true;
   } catch (error) {
-    return false;
-  }
-}
-
-async function initializeHistory() {
-  try {
-    const data = await historyApiRequest("/api/history");
-    if (!Array.isArray(data.items)) throw new Error("Invalid History response.");
-    historyApiEnabled = true;
-
-    const localRecords = loadHistory();
-    const remoteRecords = data.items.filter(item =>
-      item && typeof item.id === "string" &&
-      typeof item.problem === "string" && typeof item.answer === "string"
+    voiceStatus.textContent = tr(
+      "History সংরক্ষণ করা যায়নি। Browser storage পরীক্ষা করুন।",
+      "Could not save History. Check browser storage settings."
     );
-    const remoteIds = new Set(remoteRecords.map(item => item.id));
-    const mergedById = new Map(remoteRecords.map(item => [item.id, item]));
-
-    localRecords.forEach(item => {
-      if (!mergedById.has(item.id)) mergedById.set(item.id, item);
-    });
-
-    reportHistory = Array.from(mergedById.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, MAX_HISTORY_ITEMS);
-
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(reportHistory));
-    renderHistoryCount();
-    renderHistoryList();
-
-    const localOnlyRecords = reportHistory.filter(item => !remoteIds.has(item.id));
-    for (const record of localOnlyRecords) {
-      try {
-        await historyApiRequest("/api/history", {
-          method: "POST",
-          body: JSON.stringify(record)
-        });
-      } catch (error) {
-        historyApiEnabled = false;
-        voiceStatus.textContent = tr(
-          "পুরোনো History MongoDB-তে স্থানান্তর করা যায়নি। Browser-এ কপি রাখা হয়েছে।",
-          "Could not migrate existing History to MongoDB. The browser copy was preserved."
-        );
-        console.error("History migration failed:", error.message);
-        return;
-      }
-    }
-  } catch (error) {
-    historyApiEnabled = false;
-    console.info("Using browser-local History:", error.message);
+    return false;
   }
 }
 
@@ -1366,7 +1265,6 @@ form.addEventListener("submit", async event => {
 applyUiLanguage();
 renderHistoryCount();
 renderHistoryList();
-initializeHistory();
 syncQuickCategoryButtons();
 if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
 </script>
