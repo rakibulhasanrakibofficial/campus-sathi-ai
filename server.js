@@ -99,7 +99,8 @@ function hasBengaliScript(value) {
 }
 
 function looksLikeBanglish(value) {
-  return /\b(ami|amra|amar|amader|apni|tumi|tomar|ki|kivabe|keno|kemon|ache|nai|hobe|korbo|korte|lagbe|hochhe|hocche|varsity|class|exam|bus|notice|teacher|student|campus)\b/i.test(value);
+  // Use transliterated Bengali words, not English campus vocabulary such as "bus" or "class".
+  return /\b(ami|amra|amar|amader|amake|apni|apnar|tumi|tomar|tomake|tomra|ki|kivabe|kibhabe|keno|kemon|ache|ase|nai|hobe|hoy|hoise|hoyeche|hochhe|hocche|korbo|koro|korte|kore|kori|korle|lagbe|chai|chao|dorkar|parbo|parbe|parena|jabo|jabe|dibe|diba|dibey|dao|den|bolbo|bolo|bolen|thako|thakbe|naki|jonno|karon|kintu|theke|bujhte|bujhai|bujhao|valo|bhalo)\b/i.test(value);
 }
 
 function resolveLanguage(problem, requested) {
