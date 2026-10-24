@@ -738,7 +738,7 @@ function speakAnswer() {
   answerUtterances = splitSpeech(currentAnswer, 220).map(chunk => {
     const utterance = new SpeechSynthesisUtterance(chunk);
     utterance.lang = language;
-    utterance.rate = .96;
+    utterance.rate = 0.82;
     utterance.pitch = 1;
     if (chosenVoice) utterance.voice = chosenVoice;
     return utterance;
