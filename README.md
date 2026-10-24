@@ -93,6 +93,15 @@ The form supports these categories:
 
 The sidebar also has clickable quick-category cards. Example prompts can fill the form and select a matching category, helping new users get started quickly.
 
+### 📚 Local report history
+
+- Successfully generated reports are saved automatically in the browser’s `localStorage`.
+- Open the **History** control to see saved reports, with their date, category, language, and a short answer preview.
+- Reopen a saved report to view the original answer again; the answer can still be listened to, copied, or printed as a PDF.
+- Delete one report or clear all saved reports. Destructive actions ask for confirmation.
+- History is limited to the **50 most recent reports** and stays in the same browser profile/device. It does not sync between devices and is not stored in the app’s server database.
+- Anyone with access to the same browser profile may be able to see the saved history. Clear it on shared devices and avoid sensitive information.
+
 ### 🧩 Helpful interface details
 
 - A responsive, custom dark interface with bright cyan, mint, violet, and pink accents.
@@ -111,7 +120,7 @@ The sidebar also has clickable quick-category cards. Example prompts can fill th
 2. **Choose a category** and optionally provide a location.
 3. **Select an answer language** or leave it on automatic detection.
 4. **Build an action plan.** The backend validates the input and sends it to the configured Gemma model through Ollama.
-5. **Use the answer**—read it, listen, copy it, or print/save it as a PDF.
+5. **Use the answer**—read it, listen, copy it, or print/save it as a PDF. Successful answers are also saved in the current browser’s History, where they can be reopened or deleted.
 
 CampusSathi provides guidance only. It does not create a ticket, send a complaint to the university, or contact anyone on the student's behalf.
 
@@ -288,7 +297,7 @@ Common error statuses include:
 
 ## 🔐 Privacy, safety, and limitations
 
-- **No app database:** this project does not implement a database for storing reports or user accounts.
+- **No server-side database:** the project does not implement a database or user accounts. Report history is stored locally in the browser using `localStorage` (up to 50 reports), so it can persist after refresh but does not sync to another device.
 - **No official submission:** CampusSathi does not send complaints to university administration or contact campus staff.
 - **AI processing:** the problem description and optional location are sent to the configured Ollama endpoint to produce the answer. When Cloud mode is enabled, the request goes to Ollama Cloud.
 - **Avoid sensitive information:** do not submit passwords, student IDs, private contact details, medical details, or other sensitive personal information.
@@ -329,6 +338,9 @@ Use this before presenting or submitting the project:
 - [ ] Check Bengali playback on the target device; confirm a Bengali voice is available.
 - [ ] Test Copy and confirm the clipboard content.
 - [ ] Test Print and choose Save as PDF in the browser dialog.
+- [ ] Generate an answer, refresh the page, and confirm that it appears in History.
+- [ ] Reopen a saved report and verify its original problem and answer are restored.
+- [ ] Test deleting one report and clearing all History.
 - [ ] Check GET /api/health in the local or deployed environment.
 - [ ] Test provider failure or timeout behavior.
 - [ ] Confirm secrets are stored in environment settings and are not committed.
