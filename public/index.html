@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,6 +31,107 @@ h1{margin:17px 0 14px;font-size:clamp(42px,6.3vw,74px);line-height:.99;letter-sp
 .footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding:24px 0 32px;color:var(--dim);font-size:10px}.footer strong{color:var(--muted)}
 @media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:40px;gap:22px}.hero-side{display:none}.work-grid{grid-template-columns:1fr}.side-column{display:grid;grid-template-columns:1fr 1fr;gap:12px}.side-panel+.side-panel{margin-top:0}}
 @media(max-width:580px){.shell{width:min(100% - 22px,1180px)}.topbar{padding:14px 0}.brand-caption{display:none}.model-pill{display:none}.hero{padding:35px 0 23px}h1{letter-spacing:-2.3px;font-size:clamp(39px,12vw,59px)}.hero-copy{font-size:14px}.workflow-strip{grid-template-columns:1fr;gap:7px}.workflow-step{padding:9px 12px}.side-column{grid-template-columns:1fr}.side-panel{padding:17px}.field-row{grid-template-columns:1fr;gap:0}.submit-row{align-items:stretch;flex-direction:column}.privacy-note{max-width:none}.result-header{flex-direction:column}.result-actions{width:100%}.result-actions .btn{flex:1}}
+
+/* Refined, higher-contrast campus palette */
+:root {
+  --bg: #0b1120;
+  --panel: rgba(17, 28, 50, .92);
+  --line: rgba(147, 174, 232, .18);
+  --line2: rgba(147, 174, 232, .34);
+  --text: #f7f9ff;
+  --muted: #c2cce0;
+  --dim: #96a5c2;
+  --violet: #a5b4fc;
+  --pink: #f0abfc;
+  --cyan: #67e8f9;
+  --lime: #bef264;
+  --danger: #fda4af;
+  --shadow: 0 24px 70px rgba(1, 7, 20, .38);
+}
+body {
+  background:
+    radial-gradient(ellipse at 6% -5%, rgba(99, 102, 241, .27), transparent 38rem),
+    radial-gradient(ellipse at 96% 22%, rgba(6, 182, 212, .15), transparent 32rem),
+    radial-gradient(ellipse at 48% 105%, rgba(192, 132, 252, .08), transparent 36rem),
+    var(--bg);
+}
+body:before {
+  opacity: .12;
+  background-image:
+    linear-gradient(rgba(191, 219, 254, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(191, 219, 254, .055) 1px, transparent 1px);
+}
+.language-switch {
+  min-width: 76px;
+  border-color: rgba(103, 232, 249, .42);
+  background: linear-gradient(135deg, rgba(99, 102, 241, .19), rgba(6, 182, 212, .11));
+  color: #a5f3fc;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+.language-switch:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, .3), rgba(6, 182, 212, .18));
+  border-color: rgba(103, 232, 249, .72);
+}
+.brand-mark {
+  background: linear-gradient(140deg, #67e8f9, #bef264);
+  box-shadow: 0 8px 28px rgba(103, 232, 249, .2);
+}
+.model-pill {
+  border-color: rgba(165, 180, 252, .32);
+  background: linear-gradient(110deg, rgba(99, 102, 241, .12), rgba(6, 182, 212, .06));
+}
+.panel {
+  border-color: rgba(147, 174, 232, .2);
+  background: linear-gradient(145deg, rgba(20, 32, 57, .94), rgba(15, 23, 42, .94));
+}
+.form-panel {
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(99, 102, 241, .08), transparent 25rem),
+    linear-gradient(145deg, rgba(20, 32, 57, .96), rgba(15, 23, 42, .96));
+}
+.panel-title { color: #fbfcff; }
+.field-label { color: #e7ecff; }
+textarea, input[type=text], select {
+  background: rgba(7, 13, 28, .72);
+  border-color: rgba(147, 174, 232, .32);
+}
+textarea:focus, input:focus, select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(103, 232, 249, .1);
+}
+.btn-primary {
+  background: linear-gradient(105deg, #bef264, #67e8f9);
+  color: #0c1a2a;
+  box-shadow: 0 12px 26px rgba(103, 232, 249, .13);
+}
+.btn-primary:hover {
+  background: linear-gradient(105deg, #d9f99d, #a5f3fc);
+}
+.btn-violet {
+  color: #e0e7ff;
+  border-color: rgba(165, 180, 252, .4);
+  background: rgba(99, 102, 241, .15);
+}
+.step-number {
+  color: #c4b5fd;
+  background: linear-gradient(135deg, rgba(99, 102, 241, .22), rgba(6, 182, 212, .12));
+}
+.category-emoji {
+  background: linear-gradient(135deg, rgba(99, 102, 241, .19), rgba(6, 182, 212, .1));
+}
+.category-item:hover {
+  border-color: rgba(103, 232, 249, .32);
+  background: rgba(103, 232, 249, .035);
+}
+.result-panel {
+  background: linear-gradient(145deg, rgba(20, 32, 57, .98), rgba(12, 20, 38, .98));
+}
+.answer-body { color: #e1e8f7; }
+.answer-body h3 { color: #67e8f9; }
+.answer-body li::marker { color: #bef264; }
+::selection { background: rgba(103, 232, 249, .24); color: #fff; }
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media print{body{background:#fff;color:#111}.topbar,.hero,.workflow-strip,.form-panel,.side-column,.footer,.result-actions{display:none!important}.shell{width:100%}.result-panel{display:block!important;box-shadow:none;background:#fff;color:#111}.answer-body{color:#111}}
 </style>
@@ -41,7 +142,7 @@ h1{margin:17px 0 14px;font-size:clamp(42px,6.3vw,74px);line-height:.99;letter-sp
     <span class="brand-mark">C✳</span>
     <span><span class="brand-name">Campus<span class="accent">Sathi</span> AI</span><span class="brand-caption" data-i18n-bn="আপনার ক্যাম্পাসের সঙ্গী" data-i18n-en="Your campus companion">আপনার ক্যাম্পাসের সঙ্গী</span></span>
   </a>
-  <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><button class="btn btn-small" id="uiLanguageBtn" type="button">English</button><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
+  <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><button class="btn btn-small language-switch" id="uiLanguageBtn" type="button" aria-label="Switch interface to Bengali">বাংলা</button><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
 </header>
 
 <main class="shell">
@@ -148,7 +249,7 @@ const stopVoiceBtn = document.getElementById("stopVoiceBtn");
 const copyBtn = document.getElementById("copyBtn");
 
 const uiLanguageBtn = document.getElementById("uiLanguageBtn");
-let uiLanguage = "bn";
+let uiLanguage = "en";
 const tr = (bn, en) => uiLanguage === "bn" ? bn : en;
 function applyUiLanguage() {
   document.documentElement.lang = uiLanguage;
