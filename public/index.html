@@ -698,7 +698,7 @@ if (SpeechRecognition) {
 }
 
 function splitSpeech(text, maxLength) {
-  const normalized = text.replace(/\\s+/g, " ").trim();
+  const normalized = text.replace(/\s+/g, " ").trim();
   if (!normalized) return [];
   const sentences = normalized.match(/[^.!?।]+[.!?।]?/g) || [normalized];
   const chunks = [];
@@ -752,9 +752,9 @@ function speakAnswer() {
     return;
   }
   const spokenText = (answerBody.innerText || currentAnswer)
-    .replace(/[ \\t]+/g, " ")
-    .replace(/\\n{2,}/g, ". ")
-    .replace(/\\n/g, ". ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{2,}/g, ". ")
+    .replace(/\n/g, ". ")
     .trim();
   if (!spokenText) return;
 
