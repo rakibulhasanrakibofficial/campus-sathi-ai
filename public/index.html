@@ -476,6 +476,50 @@ textarea:focus, input:focus, select:focus {
   .result-tools { display: none !important; }
 }
 
+
+/* Browser-local report history */
+.history-count {
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px;
+  border-radius: 999px; color: #062b2b; background: #5eead4; font-size: 11px; font-weight: 950;
+}
+.history-panel { margin: 22px 0 0; padding: clamp(18px, 3vw, 29px); }
+.history-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.history-header .panel-title { margin-top: 5px; }
+.history-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.history-privacy-note {
+  margin: 14px 0 16px; border: 1px solid rgba(94,234,212,.22); border-radius: 11px; padding: 10px 12px;
+  color: #c6d9ed; background: rgba(20,184,166,.06); font-size: 11px; line-height: 1.6;
+}
+.history-empty { color: var(--muted); font-size: 13px; padding: 20px 4px; }
+.history-list { display: grid; gap: 11px; }
+.history-entry {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 15px;
+  padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.025);
+}
+.history-entry-main { min-width: 0; flex: 1; }
+.history-entry h3 { margin: 0 0 6px; color: var(--text); font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.history-meta { color: var(--dim); font-size: 10px; line-height: 1.6; margin: 0 0 7px; }
+.history-excerpt { color: var(--muted); font-size: 12px; line-height: 1.7; margin: 0; overflow-wrap: anywhere; }
+.history-category { display: inline-block; margin-bottom: 6px; border: 1px solid rgba(167,139,250,.28); background: rgba(167,139,250,.08); color: #ded3ff; border-radius: 999px; padding: 3px 8px; font-size: 10px; }
+.history-entry-actions { display: flex; gap: 7px; flex-wrap: wrap; flex-shrink: 0; }
+.history-entry-actions .btn { min-height: 38px; }
+.history-open-btn { color: #062b2b; background: linear-gradient(135deg,#a7f3d0,#5eead4); border-color: rgba(110,231,183,.9); font-weight: 900; }
+.btn-danger-soft { color: #ffe4e8; border-color: rgba(251,113,133,.4); background: rgba(225,29,72,.12); }
+.history-save-note {
+  margin: 12px 0 0; border: 1px solid rgba(94,234,212,.2); border-radius: 10px; padding: 8px 11px;
+  color: #a7f3d0; background: rgba(20,184,166,.06); font-size: 11px; line-height: 1.6;
+}
+@media (max-width: 580px) {
+  .history-header { flex-direction: column; }
+  .history-header-actions { width: 100%; }
+  .history-header-actions .btn { flex: 1; }
+  .history-entry { flex-direction: column; }
+  .history-entry-actions { width: 100%; }
+  .history-entry-actions .btn { flex: 1; }
+}
+@media print {
+  .history-panel, #historyToggle, .history-save-note { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -493,7 +537,7 @@ textarea:focus, input:focus, select:focus {
     </span>
     <span><span class="brand-name">Campus<span class="accent">Sathi</span> <span class="ai-accent">AI</span></span><span class="brand-caption" data-i18n-bn="আপনার ক্যাম্পাসের সঙ্গী" data-i18n-en="Your campus companion">আপনার ক্যাম্পাসের সঙ্গী</span></span>
   </a>
-  <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><label class="language-control" for="uiLanguageSelect"><span aria-hidden="true">🌐</span><select id="uiLanguageSelect" aria-label="Choose interface language"><option value="en">English</option><option value="bn">বাংলা</option></select></label><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
+  <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><label class="language-control" for="uiLanguageSelect"><span aria-hidden="true">🌐</span><select id="uiLanguageSelect" aria-label="Choose interface language"><option value="en">English</option><option value="bn">বাংলা</option></select></label><button class="btn btn-small" id="historyToggle" type="button" aria-expanded="false">📚 <span data-i18n-bn="হিস্ট্রি" data-i18n-en="History">History</span> <span class="history-count" id="historyCount">0</span></button><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
 </header>
 
 <main class="shell">
@@ -582,7 +626,24 @@ textarea:focus, input:focus, select:focus {
   <section class="panel result-panel hidden" id="resultPanel" aria-live="polite">
     <div class="result-header"><div><div class="section-kicker" data-i18n-bn="আপনার করণীয় পরিকল্পনা" data-i18n-en="YOUR CAMPUS ROADMAP">আপনার করণীয় পরিকল্পনা</div><h2 id="resultTitle">আপনার পরবর্তী পদক্ষেপ</h2><p class="panel-subtitle" id="resultSubtitle">Gemma থেকে পাওয়া একটি ব্যবহারিক প্রাথমিক পরিকল্পনা।</p></div><div class="result-tools"><div class="result-actions"><button class="btn btn-small" id="listenBtn" type="button">🔊 উত্তর শুনুন</button><button class="btn btn-small" id="stopVoiceBtn" type="button">■ থামান</button><button class="btn btn-small" id="copyBtn" type="button">⧉ কপি</button><button class="btn btn-small btn-violet" id="printBtn" type="button">📄 PDF সেভ করুন</button></div><small class="pdf-hint" data-i18n-bn="PDF বানাতে ক্লিক করুন, তারপর print window-তে “Save as PDF” বেছে নিন।" data-i18n-en="Click to open the print window, then choose “Save as PDF”.">PDF বানাতে ক্লিক করুন, তারপর print window-তে “Save as PDF” বেছে নিন।</small></div></div>
     <div class="answer-body" id="answerBody"></div>
+    <p class="history-save-note hidden" id="historySaveNote" role="status"></p>
     <div class="result-foot" data-i18n-bn="AI-এর পরামর্শ ভুল বা অসম্পূর্ণ হতে পারে। কাজ করার আগে বিশ্ববিদ্যালয়ের নিয়ম ও নির্ভরযোগ্য সূত্র থেকে যাচাই করুন।" data-i18n-en="AI-generated guidance can be incomplete or inaccurate. Check university policies and trusted local sources before acting.">AI-এর পরামর্শ ভুল বা অসম্পূর্ণ হতে পারে। কাজ করার আগে বিশ্ববিদ্যালয়ের নিয়ম ও নির্ভরযোগ্য সূত্র থেকে যাচাই করুন।</div>
+  </section>
+  <section class="panel history-panel hidden" id="historyPanel" aria-labelledby="historyTitle">
+    <div class="history-header">
+      <div>
+        <div class="section-kicker" data-i18n-bn="আপনার সংরক্ষিত রিপোর্ট" data-i18n-en="YOUR SAVED REPORTS">YOUR SAVED REPORTS</div>
+        <h2 id="historyTitle" class="panel-title" data-i18n-bn="রিপোর্ট হিস্ট্রি" data-i18n-en="Report history">Report history</h2>
+        <p class="panel-subtitle" data-i18n-bn="এই browser-এ সংরক্ষিত আগের AI উত্তরগুলো আবার খুলে দেখুন।" data-i18n-en="Reopen previous AI answers saved in this browser.">Reopen previous AI answers saved in this browser.</p>
+      </div>
+      <div class="history-header-actions">
+        <button class="btn btn-small btn-danger-soft" id="clearHistoryBtn" type="button" data-i18n-bn="সব মুছুন" data-i18n-en="Clear all">Clear all</button>
+        <button class="btn btn-small" id="closeHistoryBtn" type="button" data-i18n-bn="বন্ধ করুন" data-i18n-en="Close">Close</button>
+      </div>
+    </div>
+    <p class="history-privacy-note" data-i18n-bn="History শুধু এই browser/device-এ থাকে, server বা database-এ নয়। Shared device হলে ব্যবহার শেষে history মুছে দিন।" data-i18n-en="History stays in this browser/device, not on the server or in a database. Clear it on shared devices.">History stays in this browser/device, not on the server or in a database. Clear it on shared devices.</p>
+    <p class="history-empty" id="historyEmpty" data-i18n-bn="এখনো কোনো সংরক্ষিত রিপোর্ট নেই। একটি AI উত্তর তৈরি করলে এখানে দেখা যাবে।" data-i18n-en="No saved reports yet. Generate an AI answer and it will appear here.">No saved reports yet. Generate an AI answer and it will appear here.</p>
+    <div class="history-list" id="historyList"></div>
   </section>
   <footer class="footer"><span><strong>CampusSathi AI</strong> · শিক্ষার্থীদের জন্য তৈরি</span><span data-i18n-bn="Gemma AI · ব্রাউজারের ভয়েস সুবিধা · শিক্ষার্থী-কেন্দ্রিক ডিজাইন" data-i18n-en="Gemma open-weight model · Browser voice tools · Student-first by design">Gemma AI · ব্রাউজারের ভয়েস সুবিধা · শিক্ষার্থী-কেন্দ্রিক ডিজাইন</span></footer>
 </main>
@@ -606,6 +667,16 @@ const charCount = document.getElementById("charCount");
 const listenBtn = document.getElementById("listenBtn");
 const stopVoiceBtn = document.getElementById("stopVoiceBtn");
 const copyBtn = document.getElementById("copyBtn");
+const historyToggle = document.getElementById("historyToggle");
+const historyPanel = document.getElementById("historyPanel");
+const historyList = document.getElementById("historyList");
+const historyEmpty = document.getElementById("historyEmpty");
+const historyCount = document.getElementById("historyCount");
+const historySaveNote = document.getElementById("historySaveNote");
+const HISTORY_STORAGE_KEY = "campusSathiHistoryV1";
+const MAX_HISTORY_ITEMS = 50;
+let reportHistory = loadHistory();
+let currentHistoryId = null;
 
 const uiLanguageSelect = document.getElementById("uiLanguageSelect");
 let uiLanguage = "en";
@@ -639,6 +710,8 @@ function applyUiLanguage() {
 uiLanguageSelect.addEventListener("change", () => {
   uiLanguage = uiLanguageSelect.value === "bn" ? "bn" : "en";
   applyUiLanguage();
+  renderHistoryList();
+  renderHistoryCount();
 });
 
 let currentAnswer = "";
@@ -647,6 +720,178 @@ let isListening = false;
 let transcriptBeforeMic = "";
 let answerUtterances = [];
 let speechRunId = 0;
+
+function loadHistory() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || "[]");
+    if (!Array.isArray(stored)) return [];
+    return stored
+      .filter(item => item && typeof item.id === "string" && typeof item.problem === "string" && typeof item.answer === "string")
+      .slice(0, MAX_HISTORY_ITEMS);
+  } catch (error) {
+    return [];
+  }
+}
+
+function persistHistory(nextHistory) {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+    reportHistory = nextHistory;
+    renderHistoryCount();
+    renderHistoryList();
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function renderHistoryCount() {
+  historyCount.textContent = String(reportHistory.length);
+  historyToggle.setAttribute("aria-label", tr("সংরক্ষিত রিপোর্টের সংখ্যা: ", "Saved reports: ") + reportHistory.length);
+}
+
+function formatHistoryDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return tr("তারিখ অজানা", "Date unavailable");
+  return date.toLocaleString(uiLanguage === "bn" ? "bn-BD" : "en-US", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function renderHistoryList() {
+  if (!historyList || !historyEmpty) return;
+  historyList.replaceChildren();
+  historyEmpty.classList.toggle("hidden", reportHistory.length > 0);
+  document.getElementById("clearHistoryBtn").disabled = reportHistory.length === 0;
+
+  reportHistory.forEach(record => {
+    const entry = document.createElement("article");
+    entry.className = "history-entry";
+    const main = document.createElement("div");
+    main.className = "history-entry-main";
+
+    const title = document.createElement("h3");
+    title.textContent = record.problem.length > 78 ? record.problem.slice(0, 78).trim() + "…" : record.problem;
+    main.appendChild(title);
+
+    const category = document.createElement("span");
+    category.className = "history-category";
+    category.textContent = record.category || tr("সাধারণ সমস্যা", "General campus issue");
+    main.appendChild(category);
+
+    const meta = document.createElement("p");
+    meta.className = "history-meta";
+    const language = record.answerLanguage || (record.requestedLanguage === "bn" ? "Bengali" : record.requestedLanguage === "en" ? "English" : "Auto");
+    meta.textContent = formatHistoryDate(record.createdAt) + " · " + language;
+    main.appendChild(meta);
+
+    const excerpt = document.createElement("p");
+    excerpt.className = "history-excerpt";
+    excerpt.textContent = record.answer.length > 190 ? record.answer.slice(0, 190).trim() + "…" : record.answer;
+    main.appendChild(excerpt);
+
+    const actions = document.createElement("div");
+    actions.className = "history-entry-actions";
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "btn btn-small history-open-btn";
+    openButton.textContent = tr("খুলুন", "Open");
+    openButton.addEventListener("click", () => openHistoryReport(record.id));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "btn btn-small btn-danger-soft";
+    deleteButton.textContent = tr("মুছুন", "Delete");
+    deleteButton.addEventListener("click", () => deleteHistoryReport(record.id));
+
+    actions.append(openButton, deleteButton);
+    entry.append(main, actions);
+    historyList.appendChild(entry);
+  });
+}
+
+function saveHistoryEntry(details) {
+  const record = {
+    id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 9),
+    createdAt: new Date().toISOString(),
+    problem: details.problem,
+    category: details.category,
+    location: details.location,
+    requestedLanguage: details.requestedLanguage,
+    answerLanguage: details.answerLanguage,
+    answer: details.answer
+  };
+  const nextHistory = [record, ...reportHistory].slice(0, MAX_HISTORY_ITEMS);
+  return persistHistory(nextHistory) ? record : null;
+}
+
+function openHistoryReport(id) {
+  const record = reportHistory.find(item => item.id === id);
+  if (!record) return;
+
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  speechRunId++;
+  answerUtterances = [];
+  currentHistoryId = record.id;
+  currentAnswer = record.answer;
+  problemInput.value = record.problem;
+  categoryInput.value = record.category || "General campus issue";
+  locationInput.value = record.location || "";
+  replyLanguage.value = ["auto", "bn", "en"].includes(record.requestedLanguage) ? record.requestedLanguage : "auto";
+  charCount.textContent = problemInput.value.length + " / 2500";
+  syncQuickCategoryButtons();
+  renderAnswer(currentAnswer);
+
+  resultPanel.classList.remove("hidden");
+  resultTitle.textContent = tr("আগের রিপোর্টের উত্তর", "Previous report");
+  resultSubtitle.textContent = formatHistoryDate(record.createdAt);
+  listenBtn.disabled = false;
+  listenBtn.textContent = tr("🔊 উত্তর শুনুন", "🔊 Listen");
+  historySaveNote.classList.remove("hidden");
+  historySaveNote.textContent = tr("এই রিপোর্টটি এই browser-এর History থেকে খোলা হয়েছে।", "This report was reopened from this browser's History.");
+  historyPanel.classList.add("hidden");
+  historyToggle.setAttribute("aria-expanded", "false");
+  resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function deleteHistoryReport(id) {
+  const target = reportHistory.find(item => item.id === id);
+  if (!target) return;
+  if (!window.confirm(tr("এই সংরক্ষিত রিপোর্টটি মুছে ফেলবেন?", "Delete this saved report?"))) return;
+  const nextHistory = reportHistory.filter(item => item.id !== id);
+  if (!persistHistory(nextHistory)) {
+    voiceStatus.textContent = tr("History মুছে ফেলা যায়নি। Browser storage পরীক্ষা করুন।", "Could not update History. Check browser storage settings.");
+    return;
+  }
+  if (currentHistoryId === id) {
+    currentHistoryId = null;
+    historySaveNote.classList.add("hidden");
+  }
+}
+
+historyToggle.addEventListener("click", () => {
+  const opening = historyPanel.classList.contains("hidden");
+  historyPanel.classList.toggle("hidden", !opening);
+  historyToggle.setAttribute("aria-expanded", String(opening));
+  if (opening) {
+    renderHistoryList();
+    historyPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+});
+
+document.getElementById("closeHistoryBtn").addEventListener("click", () => {
+  historyPanel.classList.add("hidden");
+  historyToggle.setAttribute("aria-expanded", "false");
+});
+
+document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+  if (!reportHistory.length) return;
+  if (!window.confirm(tr("সব সংরক্ষিত রিপোর্ট মুছে ফেলবেন? এটি ফিরিয়ে আনা যাবে না।", "Delete all saved reports? This cannot be undone."))) return;
+  if (!persistHistory([])) {
+    voiceStatus.textContent = tr("History মুছে ফেলা যায়নি। Browser storage পরীক্ষা করুন।", "Could not clear History. Check browser storage settings.");
+    return;
+  }
+  currentHistoryId = null;
+  historySaveNote.classList.add("hidden");
+});
 
 problemInput.addEventListener("input", () => { charCount.textContent = problemInput.value.length + " / 2500"; });
 
@@ -703,6 +948,8 @@ function resetForm() {
   resultPanel.classList.add("hidden");
   answerBody.replaceChildren();
   currentAnswer = "";
+  currentHistoryId = null;
+  historySaveNote.classList.add("hidden");
   answerUtterances = [];
   speechRunId++;
   problemInput.focus();
@@ -983,6 +1230,20 @@ form.addEventListener("submit", async event => {
     if (typeof data.answer !== "string" || !data.answer.trim()) throw new Error(tr("AI থেকে উত্তর আসেনি। আবার চেষ্টা করুন।", "The AI response was empty. Please try again."));
     currentAnswer = data.answer.trim();
     renderAnswer(currentAnswer);
+    currentHistoryId = null;
+    const savedReport = saveHistoryEntry({
+      problem,
+      category: categoryInput.value,
+      location: locationInput.value.trim(),
+      requestedLanguage: replyLanguage.value,
+      answerLanguage: data.language || (containsBengali(currentAnswer) ? "Bengali" : "English"),
+      answer: currentAnswer
+    });
+    currentHistoryId = savedReport ? savedReport.id : null;
+    historySaveNote.classList.remove("hidden");
+    historySaveNote.textContent = savedReport
+      ? tr("✓ এই উত্তর এই browser-এর History-তে সংরক্ষণ করা হয়েছে। অন্য device-এ sync হবে না।", "✓ This answer is saved in this browser's History. It won't sync to other devices.")
+      : tr("উত্তর তৈরি হয়েছে, তবে browser storage-এ History save করা যায়নি।", "Answer generated, but it could not be saved to browser History.");
     const bengali = containsBengali(currentAnswer);
     resultTitle.textContent = tr("আপনার পরবর্তী পদক্ষেপ", "Your next steps");
     resultSubtitle.textContent = tr("Gemma থেকে পাওয়া একটি ব্যবহারিক প্রাথমিক পরিকল্পনা।", "A practical starting point from Gemma.");
@@ -998,6 +1259,8 @@ form.addEventListener("submit", async event => {
   }
 });
 applyUiLanguage();
+renderHistoryCount();
+renderHistoryList();
 syncQuickCategoryButtons();
 if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
 </script>
