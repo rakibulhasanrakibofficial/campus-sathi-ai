@@ -2,9 +2,11 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const MONGODB_URI = (process.env.MONGODB_URI || "").trim();
 const CLOUD_KEY = (process.env.OLLAMA_API_KEY || "").trim();
 const IS_CLOUD = Boolean(CLOUD_KEY);
 const MODEL = process.env.OLLAMA_MODEL || (IS_CLOUD ? "gemma4:31b" : "gemma4:e2b");
@@ -54,6 +56,7 @@ app.get("/api/health", (_req, res) => {
     service: "CampusSathi AI",
     provider: IS_CLOUD ? "Ollama Cloud" : "Local Ollama",
     model: MODEL,
+    database: mongoose.connection.readyState === 1 ? "connected" : (MONGODB_URI ? "disconnected" : "not_configured"),
     voiceFeatures: "Browser Web Speech API"
   });
 });
@@ -162,7 +165,26 @@ app.post("/api/help", async (req, res) => {
   }
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("CampusSathi AI is running on port " + PORT);
-  console.log("Provider: " + (IS_CLOUD ? "Ollama Cloud" : "Local Ollama") + " | Model: " + MODEL);
-});
+async function startServer() {
+  if (MONGODB_URI) {
+    try {
+      await mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 10000
+      });
+      console.log("MongoDB connected successfully.");
+    } catch (error) {
+      console.error("MongoDB connection failed:", error.message);
+      process.exit(1);
+    }
+  } else {
+    console.warn("MONGODB_URI is not set. Starting without MongoDB; saved History is still browser-local.");
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log("CampusSathi AI is running on port " + PORT);
+    console.log("Provider: " + (IS_CLOUD ? "Ollama Cloud" : "Local Ollama") + " | Model: " + MODEL);
+    console.log("Database: " + (mongoose.connection.readyState === 1 ? "MongoDB connected" : "not configured"));
+  });
+}
+
+startServer();
