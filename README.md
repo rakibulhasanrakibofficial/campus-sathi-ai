@@ -16,6 +16,7 @@
 
 - [Why CampusSathi?](#-why-campussathi)
 - [Features](#-features)
+- [Local report history](#-local-report-history)
 - [How it works](#-how-it-works)
 - [Technology stack](#-technology-stack)
 - [Project structure](#-project-structure)
