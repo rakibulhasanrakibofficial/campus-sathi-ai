@@ -698,30 +698,52 @@ if (SpeechRecognition) {
 }
 
 function splitSpeech(text, maxLength) {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (normalized.length <= maxLength) return normalized ? [normalized] : [];
+  const normalized = text.replace(/\\s+/g, " ").trim();
+  if (!normalized) return [];
   const sentences = normalized.match(/[^.!?।]+[.!?।]?/g) || [normalized];
   const chunks = [];
   let current = "";
+  let currentLanguage = "";
   sentences.forEach(sentence => {
     const item = sentence.trim();
     if (!item) return;
-    if ((current + " " + item).trim().length <= maxLength) current = (current + " " + item).trim();
-    else {
-      if (current) chunks.push(current);
-      if (item.length <= maxLength) current = item;
-      else {
-        const words = item.split(" ");
-        current = "";
-        words.forEach(word => {
-          if ((current + " " + word).trim().length > maxLength && current) { chunks.push(current); current = word; }
-          else current = (current + " " + word).trim();
-        });
-      }
+    const itemLanguage = containsBengali(item) ? "bn" : "en";
+    if (current && (itemLanguage !== currentLanguage || (current + " " + item).trim().length > maxLength)) {
+      chunks.push(current);
+      current = "";
+    }
+    currentLanguage = itemLanguage;
+    if (item.length <= maxLength) {
+      current = (current + " " + item).trim();
+    } else {
+      const words = item.split(" ");
+      words.forEach(word => {
+        if ((current + " " + word).trim().length > maxLength && current) {
+          chunks.push(current);
+          current = word;
+        } else {
+          current = (current + " " + word).trim();
+        }
+      });
     }
   });
   if (current) chunks.push(current);
   return chunks;
+}
+
+function pickSpeechVoice(voices, language) {
+  const prefix = language === "bn" ? "bn" : "en";
+  const matching = voices.filter(voice => voice.lang && voice.lang.toLowerCase().startsWith(prefix));
+  if (language === "bn") {
+    return matching.find(voice => voice.lang.toLowerCase() === "bn-bd")
+      || matching.find(voice => voice.lang.toLowerCase() === "bn-in")
+      || matching[0]
+      || null;
+  }
+  return matching.find(voice => voice.lang.toLowerCase() === "en-us")
+    || matching.find(voice => voice.lang.toLowerCase() === "en-gb")
+    || matching[0]
+    || null;
 }
 
 function speakAnswer() {
@@ -729,20 +751,32 @@ function speakAnswer() {
     voiceStatus.textContent = "Text-to-speech is not supported by this browser.";
     return;
   }
-  if (!currentAnswer.trim()) return;
+  const spokenText = (answerBody.innerText || currentAnswer)
+    .replace(/[ \\t]+/g, " ")
+    .replace(/\\n{2,}/g, ". ")
+    .replace(/\\n/g, ". ")
+    .trim();
+  if (!spokenText) return;
+
   const synthesis = window.speechSynthesis;
   synthesis.cancel();
   const thisRun = ++speechRunId;
-  const language = containsBengali(currentAnswer) || replyLanguage.value === "bn" ? "bn-BD" : "en-US";
-  const chosenVoice = synthesis.getVoices().find(voice => voice.lang.toLowerCase().startsWith(language.slice(0,2).toLowerCase()));
-  answerUtterances = splitSpeech(currentAnswer, 220).map(chunk => {
+  const voices = synthesis.getVoices();
+  const chunks = splitSpeech(spokenText, 220);
+  const missingBengaliVoice = chunks.some(containsBengali)
+    && !voices.some(voice => voice.lang && voice.lang.toLowerCase().startsWith("bn"));
+
+  answerUtterances = chunks.map(chunk => {
+    const language = containsBengali(chunk) ? "bn" : "en";
+    const chosenVoice = pickSpeechVoice(voices, language);
     const utterance = new SpeechSynthesisUtterance(chunk);
-    utterance.lang = language;
+    utterance.lang = chosenVoice ? chosenVoice.lang : (language === "bn" ? "bn-BD" : "en-US");
     utterance.rate = 0.82;
     utterance.pitch = 1;
     if (chosenVoice) utterance.voice = chosenVoice;
     return utterance;
   });
+
   if (!answerUtterances.length) return;
   const last = answerUtterances.length - 1;
   answerUtterances.forEach((utterance, index) => {
@@ -750,7 +784,9 @@ function speakAnswer() {
       if (thisRun !== speechRunId) return;
       listenBtn.disabled = true;
       listenBtn.textContent = tr("🔊 পড়া হচ্ছে…", "🔊 Speaking…");
-      voiceStatus.textContent = tr("উত্তর পড়ে শোনানো হচ্ছে।", "Reading the answer aloud.");
+      voiceStatus.textContent = missingBengaliVoice
+        ? tr("এই ডিভাইসে বাংলা text-to-speech voice পাওয়া যায়নি। তাই বাংলা উচ্চারণ ভুল হতে পারে; বাংলা voice ইনস্টল করে আবার চেষ্টা করুন।", "No Bengali text-to-speech voice was found on this device, so Bengali pronunciation may be inaccurate. Install a Bengali voice and try again.")
+        : tr("উত্তর পড়ে শোনানো হচ্ছে।", "Reading the answer aloud.");
     };
     utterance.onend = () => {
       if (thisRun !== speechRunId) return;
@@ -758,7 +794,9 @@ function speakAnswer() {
       else {
         listenBtn.disabled = false;
         listenBtn.textContent = tr("🔊 আবার শুনুন", "🔊 Listen again");
-        voiceStatus.textContent = tr("উত্তর পড়ে শোনানো শেষ।", "Finished reading.");
+        voiceStatus.textContent = missingBengaliVoice
+          ? tr("পড়া শেষ। ভালো বাংলা উচ্চারণের জন্য ডিভাইসে বাংলা voice ইনস্টল করতে হবে।", "Finished. For better Bengali pronunciation, install a Bengali voice on your device.")
+          : tr("উত্তর পড়ে শোনানো শেষ।", "Finished reading.");
       }
     };
     utterance.onerror = event => {
