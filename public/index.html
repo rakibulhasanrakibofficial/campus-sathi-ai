@@ -132,6 +132,196 @@ textarea:focus, input:focus, select:focus {
 .answer-body li::marker { color: #bef264; }
 ::selection { background: rgba(103, 232, 249, .24); color: #fff; }
 
+
+/* Final visual polish: vibrant but calm, clear hierarchy and friendly controls */
+:root {
+  --bg: #090f20;
+  --panel: rgba(18, 29, 53, .94);
+  --line: rgba(164, 187, 235, .17);
+  --line2: rgba(164, 187, 235, .34);
+  --text: #f8faff;
+  --muted: #c5cee2;
+  --dim: #95a4c2;
+  --violet: #b5a4ff;
+  --pink: #ff9fe5;
+  --cyan: #69e7f4;
+  --lime: #c7f36b;
+  --shadow: 0 28px 90px rgba(0, 4, 18, .4);
+}
+body {
+  background:
+    radial-gradient(ellipse at 8% -12%, rgba(99, 102, 241, .31), transparent 42rem),
+    radial-gradient(ellipse at 92% 14%, rgba(6, 182, 212, .19), transparent 33rem),
+    radial-gradient(ellipse at 52% 105%, rgba(217, 70, 239, .10), transparent 38rem),
+    linear-gradient(180deg, #0a1022 0%, #0a1223 52%, #0b1021 100%);
+}
+body:after {
+  content: "";
+  position: fixed;
+  inset: auto 0 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(105,231,244,.7), rgba(181,164,255,.6), transparent);
+  opacity: .55;
+}
+.topbar {
+  border-bottom-color: rgba(164,187,235,.13);
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.brand-mark {
+  border-radius: 14px;
+  background: linear-gradient(135deg, #67e8f9 0%, #a5b4fc 54%, #bef264 100%);
+  box-shadow: 0 9px 28px rgba(103,232,249,.19), inset 0 1px rgba(255,255,255,.48);
+}
+.brand-name { font-size: 18px; letter-spacing: -.55px; }
+.brand-caption { letter-spacing: .8px; }
+.language-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(105,231,244,.35);
+  border-radius: 12px;
+  padding: 0 9px;
+  min-height: 39px;
+  background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(6,182,212,.10));
+  color: var(--cyan);
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+.language-control select {
+  width: auto;
+  min-width: 76px;
+  padding: 7px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 850;
+  outline: none;
+  box-shadow: none;
+}
+.language-control select:focus { box-shadow: none; }
+.language-control option { background: #101a30; }
+.hero { padding-top: 60px; padding-bottom: 36px; gap: 42px; }
+.eyebrow { font-size: 10px; letter-spacing: 2.15px; }
+.eyebrow-line { height: 2px; border-radius: 2px; width: 30px; box-shadow: 0 0 12px rgba(105,231,244,.55); }
+h1 {
+  font-size: clamp(44px, 6.4vw, 78px);
+  line-height: .98;
+  letter-spacing: -4px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.gradient-text {
+  background: linear-gradient(100deg, #69e7f4 0%, #a5b4fc 42%, #f0abfc 76%, #c7f36b 115%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.hero-copy { max-width: 640px; font-size: 16px; color: #c5d0e7; }
+.hero-side {
+  border-color: rgba(133, 167, 239, .24);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(105,231,244,.15), transparent 17rem),
+    linear-gradient(140deg, rgba(99,102,241,.17), rgba(20,36,64,.78) 53%, rgba(6,182,212,.07));
+  box-shadow: 0 20px 55px rgba(3,7,24,.18), inset 0 1px rgba(255,255,255,.045);
+}
+.hero-side:before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(105,231,244,.72), rgba(181,164,255,.7), transparent);
+}
+.workflow-strip { gap: 12px; margin-bottom: 25px; }
+.workflow-step {
+  background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(105,231,244,.018));
+  border-color: rgba(164,187,235,.15);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.workflow-step:hover { transform: translateY(-2px); border-color: rgba(105,231,244,.32); background: rgba(105,231,244,.045); }
+.step-number { border-radius: 10px; background: linear-gradient(135deg, rgba(99,102,241,.25), rgba(6,182,212,.14)); }
+.panel {
+  border-color: rgba(164,187,235,.18);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(99,102,241,.055), transparent 24rem),
+    linear-gradient(145deg, rgba(18,29,53,.96), rgba(13,23,43,.96));
+  box-shadow: 0 25px 75px rgba(0,4,18,.28), inset 0 1px rgba(255,255,255,.025);
+}
+.form-panel { padding: clamp(20px, 3.2vw, 32px); }
+.panel-top { margin-bottom: 24px; }
+h2.panel-title { font-size: clamp(25px, 2.7vw, 30px); letter-spacing: -.9px; }
+.spark-icon {
+  background: linear-gradient(135deg, rgba(105,231,244,.14), rgba(181,164,255,.16));
+  border: 1px solid rgba(105,231,244,.16);
+  box-shadow: inset 0 1px rgba(255,255,255,.04);
+}
+.field-label { font-size: 12px; margin-top: 20px; }
+textarea, input[type=text], select {
+  border-radius: 14px;
+  border-color: rgba(164,187,235,.27);
+  background: rgba(5, 11, 25, .66);
+}
+textarea { min-height: 154px; padding: 15px 16px; }
+textarea:focus, input:focus, select:focus {
+  border-color: rgba(105,231,244,.8);
+  box-shadow: 0 0 0 4px rgba(105,231,244,.085), 0 0 26px rgba(105,231,244,.045);
+}
+.voice-row { margin-top: 13px; }
+.btn {
+  border-radius: 13px;
+  border-color: rgba(164,187,235,.29);
+  box-shadow: inset 0 1px rgba(255,255,255,.025);
+}
+.btn:focus-visible, .chip:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+.btn-primary {
+  background: linear-gradient(105deg, #c7f36b 0%, #90f2c8 54%, #69e7f4 100%);
+  box-shadow: 0 12px 30px rgba(105,231,244,.13), inset 0 1px rgba(255,255,255,.46);
+  letter-spacing: -.1px;
+}
+.btn-primary:hover {
+  background: linear-gradient(105deg, #d9fa93 0%, #adf8d8 54%, #9af0fc 100%);
+  box-shadow: 0 15px 34px rgba(105,231,244,.18), inset 0 1px rgba(255,255,255,.55);
+}
+.btn-violet { background: linear-gradient(135deg, rgba(99,102,241,.20), rgba(6,182,212,.08)); }
+.chip {
+  background: rgba(255,255,255,.035);
+  border-color: rgba(164,187,235,.22);
+  padding: 8px 12px;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+.chip:hover { transform: translateY(-1px); border-color: rgba(105,231,244,.5); background: rgba(105,231,244,.075); }
+.category-item {
+  border-color: rgba(164,187,235,.15);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.category-item:hover { transform: translateX(2px); border-color: rgba(105,231,244,.34); background: rgba(105,231,244,.045); }
+.category-emoji { background: linear-gradient(135deg, rgba(99,102,241,.22), rgba(6,182,212,.12)); }
+.side-panel { padding: 22px; }
+.tip-box {
+  background: linear-gradient(125deg, rgba(105,231,244,.09), rgba(181,164,255,.08), rgba(199,243,107,.035));
+  border-color: rgba(105,231,244,.19);
+}
+.result-panel {
+  border-color: rgba(105,231,244,.22);
+  background: radial-gradient(ellipse at 100% 0%, rgba(105,231,244,.055), transparent 22rem), linear-gradient(145deg, rgba(18,29,53,.98), rgba(11,20,39,.98));
+}
+.result-header { border-bottom-color: rgba(164,187,235,.18); }
+.answer-body h3 { border-left: 2px solid var(--cyan); padding-left: 10px; }
+.result-foot { border-top-color: rgba(164,187,235,.18); }
+.footer { padding-top: 28px; }
+@media (max-width: 580px) {
+  .hero { padding-top: 38px; gap: 18px; }
+  h1 { letter-spacing: -2.5px; }
+  .top-actions { gap: 6px; }
+  .language-control { padding: 0 6px; min-height: 36px; }
+  .language-control select { min-width: 66px; font-size: 11px; }
+}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media print{body{background:#fff;color:#111}.topbar,.hero,.workflow-strip,.form-panel,.side-column,.footer,.result-actions{display:none!important}.shell{width:100%}.result-panel{display:block!important;box-shadow:none;background:#fff;color:#111}.answer-body{color:#111}}
 </style>
@@ -142,7 +332,7 @@ textarea:focus, input:focus, select:focus {
     <span class="brand-mark">C✳</span>
     <span><span class="brand-name">Campus<span class="accent">Sathi</span> AI</span><span class="brand-caption" data-i18n-bn="আপনার ক্যাম্পাসের সঙ্গী" data-i18n-en="Your campus companion">আপনার ক্যাম্পাসের সঙ্গী</span></span>
   </a>
-  <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><button class="btn btn-small language-switch" id="uiLanguageBtn" type="button" aria-label="Switch interface to Bengali">বাংলা</button><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
+  <div class="top-actions"><span class="model-pill"><span class="dot"></span><span data-i18n-bn="Gemma AI চালিত" data-i18n-en="GEMMA-POWERED">Gemma AI চালিত</span></span><label class="language-control" for="uiLanguageSelect"><span aria-hidden="true">🌐</span><select id="uiLanguageSelect" aria-label="Choose interface language"><option value="en">English</option><option value="bn">বাংলা</option></select></label><button class="btn btn-small" id="newReport" type="button">＋ <span data-i18n-bn="নতুন রিপোর্ট" data-i18n-en="New report">নতুন রিপোর্ট</span></button></div>
 </header>
 
 <main class="shell">
@@ -248,7 +438,7 @@ const listenBtn = document.getElementById("listenBtn");
 const stopVoiceBtn = document.getElementById("stopVoiceBtn");
 const copyBtn = document.getElementById("copyBtn");
 
-const uiLanguageBtn = document.getElementById("uiLanguageBtn");
+const uiLanguageSelect = document.getElementById("uiLanguageSelect");
 let uiLanguage = "en";
 const tr = (bn, en) => uiLanguage === "bn" ? bn : en;
 function applyUiLanguage() {
@@ -259,8 +449,8 @@ function applyUiLanguage() {
   document.querySelectorAll("[data-placeholder-bn][data-placeholder-en]").forEach(el => {
     el.placeholder = el.getAttribute(uiLanguage === "bn" ? "data-placeholder-bn" : "data-placeholder-en");
   });
-  uiLanguageBtn.textContent = uiLanguage === "bn" ? "English" : "বাংলা";
-  uiLanguageBtn.setAttribute("aria-label", tr("ইন্টারফেস ইংরেজিতে বদলান", "Switch interface to Bengali"));
+  uiLanguageSelect.value = uiLanguage;
+  uiLanguageSelect.setAttribute("aria-label", tr("ইন্টারফেসের ভাষা বেছে নিন", "Choose interface language"));
   micBtn.textContent = isListening ? tr("■ শোনা বন্ধ করুন", "■ Stop listening") : tr("🎙 কথা বলে লিখুন", "🎙 Speak instead");
   if (micBtn.disabled) {
     voiceStatus.textContent = tr("এই ব্রাউজারে ভয়েস ইনপুট নেই। HTTPS-এ Chrome-এর মতো সমর্থিত ব্রাউজার ব্যবহার করুন।", "Speech input is not supported in this browser. Try a supported browser over HTTPS.");
@@ -277,8 +467,8 @@ function applyUiLanguage() {
   copyBtn.textContent = tr("⧉ কপি", "⧉ Copy");
   document.getElementById("printBtn").textContent = tr("↗ প্রিন্ট", "↗ Print");
 }
-uiLanguageBtn.addEventListener("click", () => {
-  uiLanguage = uiLanguage === "bn" ? "en" : "bn";
+uiLanguageSelect.addEventListener("change", () => {
+  uiLanguage = uiLanguageSelect.value === "bn" ? "bn" : "en";
   applyUiLanguage();
 });
 
